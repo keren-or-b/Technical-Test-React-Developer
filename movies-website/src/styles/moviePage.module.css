@@ -1,0 +1,39 @@
+.page {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.hero img {
+  width: 300px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.info h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.info p {
+  margin: 5px 0;
+  line-height: 1.5;
+}
+
+.overview {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #555;
+}
