@@ -3,7 +3,7 @@ import styles from "../styles/movies.module.css";
 import MovieCard from "../components/movies/movieCard/movieCard";
 import SearchInput from "../components/movies/movieCard/searchInput";
 import { useDispatch, useSelector } from "react-redux";
-import { appStarted, loadFavorites, selectCategory } from "../store/movieSlice";
+import { appStarted, selectCategory } from "../store/movieSlice";
 import {
   setPage,
   setSearchTerm,
@@ -32,8 +32,6 @@ const MoviesPage = () => {
   const moviesToShow = view === "favorites" ? favorites : movies;
 
   useEffect(() => {
-    dispatch(loadFavorites());
-
     dispatch(appStarted());
   }, [dispatch]);
 
@@ -104,7 +102,7 @@ const MoviesPage = () => {
   };
   return (
     <div>
-      <SearchInput onSearch={(term) => dispatch(setSearchTerm(term))} />
+      <SearchInput />
       <h1>All Movies</h1>
       <div className={styles.menuBar}>
         {/* <button onClick={() => dispatch(setView("popular"))}>Popular</button> */}

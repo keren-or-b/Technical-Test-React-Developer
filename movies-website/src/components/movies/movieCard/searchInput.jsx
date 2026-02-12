@@ -1,20 +1,41 @@
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { moveFocus, setSearchTerm } from "../../../store/movieSlice";
 
-const SearchInput = ({ onSearch }) => {
+const SearchInput = ({}) => {
   const inputRef = useRef();
-  const currentArea = useSelector((state) => state.movies.currentArea);
+  const dispatch = useDispatch();
 
-  const [value, setValue] = useState("");
+  const currentArea = useSelector((state) => state.movies.currentArea);
+  const searchTerm = useSelector((state) => state.movies.searchTerm);
+
+  // const [value, setValue] = useState("");
   useEffect(() => {
-    if (currentArea  === "SEARCH") {
+    if (currentArea === "SEARCH") {
       inputRef.current?.focus();
     }
   }, [currentArea]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (currentArea === "SEARCH") {
+          dispatch(moveFocus({ key: "Escape" })); // חזור לפוקוס הראשי
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentArea, dispatch]);
+
+  // const handleChange = (e) => {
+  //   const newValue = e.target.value;
+  //   setValue(newValue);
+  //   onSearch(newValue);
+  // };
   const handleChange = (e) => {
-    const newValue = e.target.value;
-    setValue(newValue);
-    onSearch(newValue);
+    dispatch(setSearchTerm(e.target.value));
   };
 
   return (
@@ -23,7 +44,7 @@ const SearchInput = ({ onSearch }) => {
         ref={inputRef}
         type="text"
         placeholder="Search movies..."
-        value={value}
+        value={searchTerm} // ← כאן
         onChange={handleChange}
         style={{
           padding: "8px 12px",

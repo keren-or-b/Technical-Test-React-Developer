@@ -1,11 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+const loadFromStorage = () => {
+  try {
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    return [];
+  }
+};
 const initialState = {
   areas: ["SEARCH", "NAV_BAR", "MOVIE_GRID", "PAGINATION"],
   movies: [],
   movieDetails: null,
 
-  favorites: [],
+  favorites: loadFromStorage(),
   loading: false,
   error: null,
   totalPages: 1,
@@ -82,6 +89,10 @@ const movieSlice = createSlice({
       // ========================
       if (state.currentArea === "SEARCH") {
         if (key === "ArrowDown") {
+          state.currentArea = "NAV_BAR";
+        }
+        if (key === "Escape") {
+          state.searchTerm = "";
           state.currentArea = "NAV_BAR";
         }
       }
@@ -171,10 +182,10 @@ const movieSlice = createSlice({
         state.favorites.push(movie);
       }
     },
-    loadFavorites: (state) => {
-      const saved = localStorage.getItem("favorites");
-      if (saved) state.favorites = JSON.parse(saved);
-    },
+    // loadFavorites: (state) => {
+    //   const saved = localStorage.getItem("favorites");
+    //   if (saved) state.favorites = JSON.parse(saved);
+    // },
   },
 });
 
@@ -192,7 +203,6 @@ export const {
   selectCategory,
   setSearchTerm,
   toggleFavorite,
-  loadFavorites,
 } = movieSlice.actions;
 
 export default movieSlice.reducer;

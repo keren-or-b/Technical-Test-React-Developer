@@ -4,7 +4,6 @@ import styles from "../styles/MoviePage.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMovieDetailsRequest, toggleFavorite } from "../store/movieSlice";
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const MovieDetails = () => {
   const { id } = useParams(); // קבלת id מהראוט
