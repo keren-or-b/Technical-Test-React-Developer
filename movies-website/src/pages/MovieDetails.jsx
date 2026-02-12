@@ -1,34 +1,52 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/MoviePage.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMovieDetailsRequest, toggleFavorite } from "../store/movieSlice";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const MovieDetails = () => {
   const { id } = useParams(); // קבלת id מהראוט
-  const [movie, setMovie] = useState(null);
+  const dispatch = useDispatch();
+    const navigate = useNavigate();
+  const { movieDetails, loading, error, favorites } = useSelector(
+    (state) => state.movies,
+  );
+  const isFavorite = favorites.some((fav) => fav.id === movieDetails.id);
 
   useEffect(() => {
-    fetch(
-      `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=en-US`,
-    )
-      .then((res) => res.json())
-      .then((data) => setMovie(data));
+    dispatch(fetchMovieDetailsRequest({ id }));
   }, [id]);
 
-  if (!movie) return <p>Loading...</p>;
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        navigate(-1); // חזרה לדף הקודם
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [navigate]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!movieDetails) return null;
 
   return (
     <div className={styles.page}>
       <div className={styles.hero}>
         <img
-          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-          alt={movie.title}
+          src={`https://image.tmdb.org/t/p/w500${movieDetails.poster_path}`}
+          alt={movieDetails.title}
         />
         <div className={styles.info}>
-          <h1>{movie.title}</h1>
-          <p>{movie.release_date}</p>
-          <p className={styles.overview}>{movie.overview}</p>
+          <h1>{movieDetails.title}</h1>
+          <p>{movieDetails.release_date}</p>
+          <p className={styles.overview}>{movieDetails.overview}</p>
+          <button onClick={() => dispatch(toggleFavorite(movieDetails))}>
+            {isFavorite ? "💔 Remove from Favorites" : "❤️ Add to Favorites"}
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+  areas: ["SEARCH", "NAV_BAR", "MOVIE_GRID", "PAGINATION"],
   movies: [],
+  movieDetails: null,
+
   favorites: [],
   loading: false,
   error: null,
@@ -9,12 +12,20 @@ const initialState = {
   page: 1,
   view: "popular",
   searchTerm: "",
+  currentArea: "MOVIE_GRID", // 'menu' או 'movies'
+  navIndex: 0, // 0: Popular, 1: Now Playing, 2: Favorites
+  movieIndex: 0,
+  paginationIndex: 0, // 0 = Prev, 1 = Next
 };
 
-const moviesSlice = createSlice({
+const movieSlice = createSlice({
   name: "movies",
   initialState,
   reducers: {
+    appStarted: (state) => {
+      // הפעולה הזו לא צריכה לעשות כלום ב-State,
+      // היא רק "סיגנל" עבור הסאגה.
+    },
     // פעולה לבקשת fetch
     fetchMoviesRequest: (state, action) => {
       state.loading = true;
@@ -28,6 +39,19 @@ const moviesSlice = createSlice({
     },
     // פעולה כשיש שגיאה
     fetchMoviesFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    fetchMovieDetailsRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchMovieDetailsSuccess: (state, action) => {
+      state.loading = false;
+      state.movieDetails = action.payload;
+    },
+    fetchMovieDetailsFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
@@ -45,6 +69,98 @@ const moviesSlice = createSlice({
       state.searchTerm = action.payload;
       state.page = 1;
     },
+    moveFocus: (state, action) => {
+      const { key } = action.payload;
+      const columns = 4;
+      const totalMovies =
+        state.view === "favorites"
+          ? state.favorites.length
+          : state.movies.length;
+
+      // ========================
+      // SEARCH
+      // ========================
+      if (state.currentArea === "SEARCH") {
+        if (key === "ArrowDown") {
+          state.currentArea = "NAV_BAR";
+        }
+      }
+
+      // ========================
+      // NAV BAR
+      // ========================
+      else if (state.currentArea === "NAV_BAR") {
+        if (key === "ArrowRight")
+          state.navIndex = Math.min(state.navIndex + 1, 2);
+        if (key === "ArrowLeft")
+          state.navIndex = Math.max(state.navIndex - 1, 0);
+        if (key === "ArrowDown") {
+          if (totalMovies > 0) {
+            state.currentArea = "MOVIE_GRID";
+            state.movieIndex = 0; // תמיד מתחיל מהסרט הראשון
+          }
+        }
+        if (key === "ArrowUp") {
+          state.currentArea = "SEARCH";
+        }
+      }
+      // ========================
+      // MOVIE GRID
+      // ========================
+      else if (state.currentArea === "MOVIE_GRID") {
+        if (key === "ArrowRight")
+          state.movieIndex = Math.min(state.movieIndex + 1, totalMovies - 1);
+        if (key === "ArrowLeft")
+          state.movieIndex = Math.max(state.movieIndex - 1, 0);
+
+        if (key === "ArrowUp") {
+          if (state.movieIndex < columns) {
+            // אם המשתמש בשורה הראשונה ולחץ למעלה -> חזור לתפריט
+            state.currentArea = "NAV_BAR";
+            state.movieIndex = 0; // איפס לשימוש הבא
+          } else {
+            // עלייה שורה אחת למעלה בתוך הגריד
+            state.movieIndex -= columns;
+          }
+        }
+        //   if (key === "ArrowDown")
+        //   state.movieIndex = Math.min(
+        //     state.movieIndex + columns,
+        //     state.movies.length - 1,
+        //   );
+        if (key === "ArrowDown") {
+          const nextIndex = state.movieIndex + columns;
+
+          if (nextIndex < totalMovies) {
+            state.movieIndex = nextIndex;
+          } else {
+            // אם אין עוד שורה → לעבור ל-pagination
+            state.currentArea = "PAGINATION";
+          }
+        }
+      }
+      // ========================
+      // PAGINATION
+      // ========================
+      else if (state.currentArea === "PAGINATION") {
+        if (key === "ArrowRight")
+          state.paginationIndex = Math.min(state.paginationIndex + 1, 1);
+
+        if (key === "ArrowLeft")
+          state.paginationIndex = Math.max(state.paginationIndex - 1, 0);
+
+        if (key === "ArrowUp") {
+          state.currentArea = "MOVIE_GRID";
+        }
+      }
+    },
+
+    selectCategory: (state) => {
+      const categories = ["popular", "now_playing", "favorites"];
+      state.view = categories[state.navIndex];
+      state.page = 1;
+    },
+
     // ניהול favorites ב-localStorage
     toggleFavorite: (state, action) => {
       const movie = action.payload;
@@ -54,7 +170,6 @@ const moviesSlice = createSlice({
       } else {
         state.favorites.push(movie);
       }
-      localStorage.setItem("favorites", JSON.stringify(state.favorites));
     },
     loadFavorites: (state) => {
       const saved = localStorage.getItem("favorites");
@@ -64,14 +179,20 @@ const moviesSlice = createSlice({
 });
 
 export const {
+  appStarted,
   fetchMoviesRequest,
   fetchMoviesSuccess,
   fetchMoviesFailure,
+  fetchMovieDetailsRequest,
+  fetchMovieDetailsSuccess,
+  fetchMovieDetailsFailure,
   setView,
   setPage,
+  moveFocus,
+  selectCategory,
   setSearchTerm,
   toggleFavorite,
   loadFavorites,
-} = moviesSlice.actions;
+} = movieSlice.actions;
 
-export default moviesSlice.reducer;
+export default movieSlice.reducer;

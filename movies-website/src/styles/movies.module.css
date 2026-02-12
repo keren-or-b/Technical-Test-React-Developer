@@ -4,3 +4,76 @@
   gap: 40px;
   padding: 20px;
 }
+
+/* התפריט העליון */
+.menuBar {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.navBtn {
+  padding: 10px 20px;
+  border: 2px solid #444;
+  background: #333;
+  color: white;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+/* הסטייל שמופעל כשהכפתור ב"פוקוס" של המקלדת */
+.navBtn.active {
+  background: #007bff;
+  border-color: #fff;
+  outline: 4px solid rgba(0, 123, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Pagination Container ===== */
+.paginationWrapper {
+  margin-top: 30px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ===== Buttons ===== */
+.paginationBtn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-color: #1e1e1e;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.paginationBtn:hover:not(:disabled) {
+  background-color: #2d2d2d;
+}
+
+/* Disabled */
+.paginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Active (כשיש focus מהמקלדת) */
+.paginationActive {
+  border-color: #00bfff;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.6);
+  transform: scale(1.05);
+}
+
+/* Page text */
+.paginationInfo {
+  font-size: 14px;
+  color: #ccc;
+}

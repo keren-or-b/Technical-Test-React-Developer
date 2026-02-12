@@ -21,3 +21,10 @@
   font-size: 18px;
   padding: 0 5px;
 }
+
+.card.active {
+  outline: 4px solid #007bff; /* outline עדיף על border כי הוא לא מזיז את האלמנטים */
+  transform: scale(1.05);
+  z-index: 10;
+  position: relative;
+}
