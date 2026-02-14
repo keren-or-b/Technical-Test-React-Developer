@@ -10,9 +10,12 @@ const SearchInput = ({}) => {
   const searchTerm = useSelector((state) => state.movies.searchTerm);
 
   // const [value, setValue] = useState("");
+
   useEffect(() => {
     if (currentArea === "SEARCH") {
       inputRef.current?.focus();
+    } else {
+      inputRef.current?.blur();
     }
   }, [currentArea]);
 

@@ -77,7 +77,7 @@ const movieSlice = createSlice({
       state.page = 1;
     },
     moveFocus: (state, action) => {
-      const { key } = action.payload;
+      const { key, area, index } = action.payload;
       const columns = 4;
       const totalMovies =
         state.view === "favorites"
@@ -85,14 +85,54 @@ const movieSlice = createSlice({
           : state.movies.length;
 
       // ========================
+      // MOUSE SUPPORT
+      // ========================
+      if (area) {
+        state.currentArea = area;
+
+        if (area === "NAV_BAR") {
+          state.navIndex = index;
+        }
+
+        if (area === "MOVIE_GRID") {
+          state.movieIndex = index;
+        }
+
+        if (area === "PAGINATION") {
+          state.paginationIndex = index;
+        }
+
+        return;
+      }
+      // ========================
+      // ESCAPE – עולה אזור אחד למעלה
+      // ========================
+      if (key === "Escape") {
+        if (state.currentArea === "PAGINATION") {
+          state.currentArea = "MOVIE_GRID";
+          return;
+        }
+
+        if (state.currentArea === "MOVIE_GRID") {
+          state.currentArea = "NAV_BAR";
+          state.movieIndex = 0;
+          return;
+        }
+
+        if (state.currentArea === "SEARCH") {
+          state.currentArea = "NAV_BAR";
+          state.searchTerm = ""; // אם רוצים גם לנקות חיפוש
+          return;
+        }
+
+        // אם כבר ב-NAV_BAR → לא עושים כלום
+        return;
+      }
+      // ========================
       // SEARCH
       // ========================
       if (state.currentArea === "SEARCH") {
         if (key === "ArrowDown") {
-          state.currentArea = "NAV_BAR";
-        }
-        if (key === "Escape") {
-          state.searchTerm = "";
           state.currentArea = "NAV_BAR";
         }
       }

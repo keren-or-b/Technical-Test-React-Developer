@@ -12,11 +12,11 @@ const MovieDetails = () => {
   const { movieDetails, loading, error, favorites } = useSelector(
     (state) => state.movies,
   );
-  const isFavorite = favorites.some((fav) => fav.id === movieDetails.id);
+  const isFavorite = favorites.some((fav) => fav.id === movieDetails?.id);
 
-  useEffect(() => {
-    dispatch(fetchMovieDetailsRequest({ id }));
-  }, [id]);
+ useEffect(() => {
+  dispatch(fetchMovieDetailsRequest({ id }));
+}, [id, dispatch]);
 
   useEffect(() => {
     const handleEscape = (e) => {
