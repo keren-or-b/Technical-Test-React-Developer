@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { moveFocus, setSearchTerm } from "../../../store/movieSlice";
+import { moveFocus, setSearchTerm } from "../redux/movies/movieSlice";
 
 const SearchInput = ({}) => {
   const inputRef = useRef();

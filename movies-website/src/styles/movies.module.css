@@ -77,3 +77,50 @@
   font-size: 14px;
   color: #ccc;
 }
+
+/* --- עיצוב טעינה גדול ומרכזי --- */
+
+/* המיכל שעוטף את הספינר */
+.loadingContainer {
+  /* שימוש בפלקס כדי למרכז בכל הכיוונים */
+  display: flex;
+  justify-content: center; /* מירכוז אופקי */
+  align-items: center; /* מירכוז אנכי */
+
+  /* תופס את כל הרוחב ולפחות 70% מגובה המסך */
+  width: 100%;
+  min-height: 70vh;
+
+  /* אופציונלי: רקע עדין כדי להבליט את איזור הטעינה */
+  /* background-color: rgba(0, 0, 0, 0.02); */
+}
+
+/* הספינר עצמו */
+.spinner {
+  /* גודל גדול משמעותית */
+  width: 100px; /* היה 50px */
+  height: 100px; /* היה 50px */
+
+  /* גבולות עבים יותר שיתאימו לגודל */
+  border: 10px solid #e0e0e0; /* צבע המסלול (אפור בהיר) */
+  border-top: 10px solid #3498db; /* הצבע המסתובב (כחול) */
+
+  /* הופך אותו לעיגול */
+  border-radius: 50%;
+
+  /* אנימציית הסיבוב - מעט איטית יותר לגודל הזה */
+  animation: spin 1.2s linear infinite;
+
+  /* אופציונלי: צל עדין כדי לתת עומק */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* הגדרת האנימציה (נשאר אותו דבר) */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

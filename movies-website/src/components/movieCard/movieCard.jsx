@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import styles from "./movieCard.module.css";
 import { useEffect, useRef } from "react";
 const MovieCard = ({ movie, isActive, onMouseMove, onClick }) => {
-  // const navigate = useNavigate();
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -13,9 +12,6 @@ const MovieCard = ({ movie, isActive, onMouseMove, onClick }) => {
     }
   }, [isActive]);
 
-  // const handleClick = () => {
-  //   navigate(`/movie/${movie.id}`);
-  // };
 
   return (
     <div

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/MoviePage.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMovieDetailsRequest, toggleFavorite } from "../store/movieSlice";
+import { fetchMovieDetailsRequest, toggleFavorite } from "../redux/movies/movieSlice";
 
 
 const MovieDetails = () => {

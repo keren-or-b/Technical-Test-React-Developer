@@ -34,7 +34,7 @@ const movieSlice = createSlice({
       // היא רק "סיגנל" עבור הסאגה.
     },
     // פעולה לבקשת fetch
-    fetchMoviesRequest: (state, action) => {
+    fetchMoviesRequest: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -74,7 +74,15 @@ const movieSlice = createSlice({
     // שינוי searchTerm
     setSearchTerm: (state, action) => {
       state.searchTerm = action.payload;
-      state.page = 1;
+      state.page = 1; // תמיד מאפסים עמוד בחיפוש חדש
+
+      // הלוגיקה החדשה:
+      // אם יש טקסט בחיפוש והמשתמש נמצא במועדפים -> החזר אותו לפופולרי
+      // (כדי שיוכל לראות את תוצאות החיפוש שיגיעו מה-API)
+      if (state.searchTerm.length > 0 && state.view === "favorites") {
+        state.view = "popular";
+        state.movies = []; // אופציונלי: ניקוי סרטים קודמים כדי למנוע בלבול עד שהתוצאות יגיעו
+      }
     },
     moveFocus: (state, action) => {
       const { key, area, index } = action.payload;
@@ -221,6 +229,7 @@ const movieSlice = createSlice({
       } else {
         state.favorites.push(movie);
       }
+      localStorage.setItem("favorites", JSON.stringify(state.favorites));
     },
     // loadFavorites: (state) => {
     //   const saved = localStorage.getItem("favorites");
