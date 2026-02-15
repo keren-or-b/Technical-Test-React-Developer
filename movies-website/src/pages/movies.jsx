@@ -52,6 +52,23 @@ const MoviesPage = () => {
     }
   }, [currentArea]);
 
+  const handleCardHover = useCallback(
+    (index) => {
+      // אנחנו שולחים ישר לרידקס. הבדיקה אם צריך לעדכן יכולה לקרות שם,
+      // או שאפשר להוסיף כאן בדיקה, אבל עדיף שהפונקציה לא תהיה תלויה ב-movieIndex
+      dispatch(moveFocus({ area: "MOVIE_GRID", index }));
+    },
+    [dispatch],
+  );
+
+  // פונקציה לטיפול בלחיצה - מקבלת את ה-ID כפרמטר
+  const handleCardClick = useCallback(
+    (movieId) => {
+      navigate(`/movie/${movieId}`);
+    },
+    [navigate],
+  );
+
   return (
     <div>
       <SearchInput />
@@ -85,12 +102,9 @@ const MoviesPage = () => {
               <MovieCard
                 movie={movie}
                 isActive={currentArea === "MOVIE_GRID" && index === movieIndex}
-                onMouseMove={() => {
-                  if (currentArea !== "MOVIE_GRID" || movieIndex !== index) {
-                    dispatch(moveFocus({ area: "MOVIE_GRID", index }));
-                  }
-                }}
-                onClick={() => navigate(`/movie/${movie.id}`)}
+                onHover={handleCardHover}
+                onClick={handleCardClick}
+                index={index}
               />
             ))}
           </div>

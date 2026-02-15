@@ -1,18 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-const loadFromStorage = () => {
-  try {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  } catch (e) {
-    return [];
-  }
-};
+import { localStorageUtils } from "../../utils/localStorage";
+
 const initialState = {
   areas: ["SEARCH", "NAV_BAR", "MOVIE_GRID", "PAGINATION"],
   movies: [],
   movieDetails: null,
-
-  favorites: loadFromStorage(),
+  favorites: localStorageUtils.getFavorites(),
   loading: false,
   error: null,
   totalPages: 1,
@@ -229,7 +222,7 @@ const movieSlice = createSlice({
       } else {
         state.favorites.push(movie);
       }
-      localStorage.setItem("favorites", JSON.stringify(state.favorites));
+      localStorageUtils.saveFavorites(state.favorites);
     },
     // loadFavorites: (state) => {
     //   const saved = localStorage.getItem("favorites");
