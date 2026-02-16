@@ -1,0 +1,59 @@
+/* styles/SearchInput.module.css */
+
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px; /* רוחב מקסימלי */
+}
+
+/* אייקון חיפוש (אופציונלי - עשוי ב-CSS טהור) */
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c8c8c;
+  font-size: 1.2rem;
+  pointer-events: none; /* כדי שהלחיצה תעבור לאינפוט */
+  transition: color 0.3s ease;
+}
+
+.input {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* רקע כהה שקוף */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* גבול עדין */
+  color: #fff;
+  padding: 12px 20px 12px 45px; /* ריפוד משמאל בשביל האייקון */
+  font-size: 1.1rem;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.input::placeholder {
+  color: #8c8c8c;
+}
+
+/* === מצב פוקוס (כשהמקלדת/עכבר עליו) === */
+.focused {
+  background-color: rgba(0, 0, 0, 0.9); /* רקע כהה יותר */
+  border-color: #fff; /* גבול לבן בוהק */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  transform: scale(1.02); /* גדילה קלה */
+}
+
+/* כשיש פוקוס, האייקון נהיה לבן */
+.focused + .searchIcon,
+.input:focus + .searchIcon {
+  color: #fff;
+}

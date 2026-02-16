@@ -1,62 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { moveFocus, setSearchTerm } from "../redux/movies/movieSlice";
+// ייבוא הפעולות והסלקטורים
+import {
+  setSearchTerm,
+  selectFocusArea,
+  selectSearchTerm,
+} from "../redux/movies/movieSlice";
 
-const SearchInput = ({}) => {
-  const inputRef = useRef();
+// ייבוא העיצוב החדש
+import styles from "./searchInput.module.css";
+
+const SearchInput = () => {
+  const inputRef = useRef(null);
   const dispatch = useDispatch();
 
-  const currentArea = useSelector((state) => state.movies.currentArea);
-  const searchTerm = useSelector((state) => state.movies.searchTerm);
+  const focusArea = useSelector(selectFocusArea);
+  const searchTerm = useSelector(selectSearchTerm);
 
-  // const [value, setValue] = useState("");
-
+  // סנכרון פוקוס
   useEffect(() => {
-    if (currentArea === "SEARCH") {
+    if (focusArea === "SEARCH") {
       inputRef.current?.focus();
     } else {
       inputRef.current?.blur();
     }
-  }, [currentArea]);
+  }, [focusArea]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        if (currentArea === "SEARCH") {
-          dispatch(moveFocus({ key: "Escape" })); // חזור לפוקוס הראשי
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentArea, dispatch]);
-
-  // const handleChange = (e) => {
-  //   const newValue = e.target.value;
-  //   setValue(newValue);
-  //   onSearch(newValue);
-  // };
   const handleChange = (e) => {
     dispatch(setSearchTerm(e.target.value));
   };
 
+  // בדיקה האם האינפוט בפוקוס כרגע (לצורך עיצוב)
+  const isFocused = focusArea === "SEARCH";
+
   return (
-    <div style={{ margin: "20px 0", textAlign: "center" }}>
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Search movies..."
-        value={searchTerm} // ← כאן
-        onChange={handleChange}
-        style={{
-          padding: "8px 12px",
-          width: "250px",
-          borderRadius: "6px",
-          border: "1px solid #ccc",
-          outline: "none",
-        }}
-      />
+    <div className={styles.container}>
+      <div className={styles.inputWrapper}>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Titles, people, genres..."
+          value={searchTerm}
+          onChange={handleChange}
+          className={`${styles.input} ${isFocused ? styles.focused : ""}`}
+        />
+        {/* אייקון חיפוש קטן בצד שמאל */}
+        <span className={styles.searchIcon}>🔍</span>
+      </div>
     </div>
   );
 };

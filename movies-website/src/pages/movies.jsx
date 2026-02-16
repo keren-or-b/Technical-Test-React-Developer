@@ -1,67 +1,106 @@
-import { useEffect, useRef } from "react";
-import styles from "../styles/movies.module.css";
-import MovieCard from "../components/movieCard/movieCard";
-import SearchInput from "../components/searchInput";
+import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+// Redux & Logic
 import {
   appStarted,
-  selectCategory,
+  setView,
   setPage,
-  moveFocus,
+  setFocusArea,
+  setFocusIndex,
+  selectCurrentMovies,
+  selectIsLoading,
+  selectFocusArea,
+  selectFocusIndex,
+  selectCurrentView,
+  selectPage,
+  selectTotalPages,
 } from "../redux/movies/movieSlice";
-import { useNavigate } from "react-router-dom";
-import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation";
 
-const categories = ["Popular", "Now Playing", "Favorites"];
+import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation"; // שים לב לתיקון האות הקטנה ב-file name אם צריך
+import { VIEW_CATEGORIES } from "../services/navigationService";
+
+// Components & Styles
+import MovieCard from "../components/movieCard/movieCard";
+import SearchInput from "../components/searchInput";
+import styles from "../styles/movies.module.css";
 
 const MoviesPage = () => {
-  const navigate = useNavigate();
-
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const navBarRef = useRef(null);
 
-  const {
-    movies,
-    favorites,
-    totalPages,
-    page,
-    view,
-    loading,
-    currentArea,
-    navIndex,
-    movieIndex,
-    paginationIndex,
-  } = useSelector((state) => state.movies);
+  // Selectors
+  const movies = useSelector(selectCurrentMovies);
+  const loading = useSelector(selectIsLoading);
+  const focusArea = useSelector(selectFocusArea);
+  const focusIndex = useSelector(selectFocusIndex);
+  const currentView = useSelector(selectCurrentView);
+  const page = useSelector(selectPage);
+  const totalPages = useSelector(selectTotalPages);
 
+  // Keyboard Hook
   useKeyboardNavigation();
-  const moviesToShow = view === "favorites" ? favorites : movies;
 
+  // Initial Load
   useEffect(() => {
     dispatch(appStarted());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   localStorage.setItem("favorites", JSON.stringify(favorites));
-  // }, [favorites]);
-
   useEffect(() => {
-    if (currentArea === "NAV_BAR") {
+    if (focusArea === "NAV_BAR") {
       navBarRef.current?.scrollIntoView({
         block: "center",
       });
     }
-  }, [currentArea]);
+    if (focusArea === "PAGINATION") {
+      // מציאת האלמנט של הפג'ינציה וגלילה אליו
+      const paginationElement = document.querySelector(
+        `.${styles.paginationWrapper}`,
+      );
+      if (paginationElement) {
+        paginationElement.scrollIntoView({
+          behavior: "smooth",
+          block: "end", // גולל כך שהפג'ינציה תהיה בתחתית המסך
+        });
+      }
+    }
+  }, [focusArea]);
+
+  // Auto-Select on Hover Logic
+  useEffect(() => {
+    let timer;
+    if (focusArea === "NAV_BAR") {
+      timer = setTimeout(() => {
+        const targetView = VIEW_CATEGORIES[focusIndex];
+        if (targetView && targetView !== currentView) {
+          dispatch(setView(targetView));
+        }
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [focusArea, focusIndex, currentView, dispatch]);
+
+  // Handlers
+  const handleNavHover = (index) => {
+    dispatch(setFocusArea("NAV_BAR"));
+    dispatch(setFocusIndex(index));
+  };
+
+  const handleNavClick = (viewName) => {
+    dispatch(setView(viewName));
+    dispatch(setFocusArea("MOVIE_GRID"));
+  };
 
   const handleCardHover = useCallback(
     (index) => {
-      // אנחנו שולחים ישר לרידקס. הבדיקה אם צריך לעדכן יכולה לקרות שם,
-      // או שאפשר להוסיף כאן בדיקה, אבל עדיף שהפונקציה לא תהיה תלויה ב-movieIndex
-      dispatch(moveFocus({ area: "MOVIE_GRID", index }));
+      dispatch(setFocusArea("MOVIE_GRID"));
+      dispatch(setFocusIndex(index));
     },
     [dispatch],
   );
 
-  // פונקציה לטיפול בלחיצה - מקבלת את ה-ID כפרמטר
   const handleCardClick = useCallback(
     (movieId) => {
       navigate(`/movie/${movieId}`);
@@ -69,59 +108,87 @@ const MoviesPage = () => {
     [navigate],
   );
 
+  const handlePaginationHover = (index) => {
+    dispatch(setFocusArea("PAGINATION"));
+    dispatch(setFocusIndex(index));
+  };
+
   return (
-    <div>
-      <SearchInput />
-      <div className={styles.menuBar} ref={navBarRef}>
-        {categories.map((label, index) => (
-          <button
-            key={label}
-            className={`${styles.navBtn} ${
-              currentArea === "NAV_BAR" && navIndex === index
-                ? styles.active
-                : ""
-            }`}
-            onMouseMove={() => dispatch(moveFocus({ area: "NAV_BAR", index }))}
-            onClick={() => {
-              dispatch(moveFocus({ area: "NAV_BAR", index }));
-              dispatch(selectCategory());
-            }}
-          >
-            {label}
-          </button>
-        ))}
+    <div className={styles.container}>
+      {/* === HEADER SECTION (Search + Nav) === */}
+      <div className={styles.headerWrapper}>
+        <div className={styles.searchWrapper}>
+          <SearchInput />
+        </div>
+
+        <div className={styles.menuBar} ref={navBarRef}>
+          {VIEW_CATEGORIES.map((viewName, index) => {
+            const label = viewName.replace("_", " ").toUpperCase();
+
+            // לוגיקת Active/Focus
+            const isSelected = currentView === viewName;
+            const isFocused = focusArea === "NAV_BAR" && focusIndex === index;
+
+            return (
+              <button
+                key={viewName}
+                className={`
+                  ${styles.navBtn} 
+                  ${isSelected ? styles.selected : ""} 
+                  ${isFocused ? styles.focused : ""}
+                `}
+                onMouseMove={() => handleNavHover(index)}
+                onClick={() => handleNavClick(viewName)}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* === MAIN CONTENT === */}
       {loading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
         </div>
       ) : (
         <>
+          {/* === MOVIE GRID === */}
+          {/* כאן אני מניח ש-MovieCard מטפל בעיצוב של עצמו, 
+              אבל הגריד ב-CSS מסדר אותם ב-4 עמודות */}
           <div className={styles.movieGrid}>
-            {moviesToShow?.map((movie, index) => (
-              <MovieCard
-                movie={movie}
-                isActive={currentArea === "MOVIE_GRID" && index === movieIndex}
-                onHover={handleCardHover}
-                onClick={handleCardClick}
-                index={index}
-              />
-            ))}
+            {movies.length > 0 ? (
+              movies.map((movie, index) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  index={index}
+                  isActive={focusArea === "MOVIE_GRID" && focusIndex === index}
+                  onHover={handleCardHover}
+                  onClick={handleCardClick}
+                />
+              ))
+            ) : (
+              <div className={styles.noResults}>No movies found</div>
+            )}
           </div>
-          {view !== "favorites" && (
+
+          {/* === PAGINATION === */}
+          {/* הצג פג'ינציה אם אנחנו לא במועדפים (או אם החזרת את הלוגיקה למועדפים) */}
+          {currentView !== "favorites" && movies.length > 0 && (
             <div className={styles.paginationWrapper}>
+              {/* Prev */}
               <button
                 className={`${styles.paginationBtn} ${
-                  currentArea === "PAGINATION" && paginationIndex === 0
+                  focusArea === "PAGINATION" && focusIndex === 0
                     ? styles.paginationActive
                     : ""
                 }`}
                 disabled={page === 1}
-                onMouseEnter={() =>
-                  dispatch(moveFocus({ area: "PAGINATION", index: 0 }))
-                }
+                onMouseEnter={() => handlePaginationHover(0)}
                 onClick={() => {
-                  dispatch(moveFocus({ area: "PAGINATION", index: 0 }));
+                  dispatch(setFocusArea("PAGINATION"));
                   if (page > 1) dispatch(setPage(page - 1));
                 }}
               >
@@ -132,18 +199,17 @@ const MoviesPage = () => {
                 Page {page} of {totalPages}
               </span>
 
+              {/* Next */}
               <button
                 className={`${styles.paginationBtn} ${
-                  currentArea === "PAGINATION" && paginationIndex === 1
+                  focusArea === "PAGINATION" && focusIndex === 1
                     ? styles.paginationActive
                     : ""
                 }`}
                 disabled={page === totalPages}
-                onMouseEnter={() =>
-                  dispatch(moveFocus({ area: "PAGINATION", index: 1 }))
-                }
+                onMouseEnter={() => handlePaginationHover(1)}
                 onClick={() => {
-                  dispatch(moveFocus({ area: "PAGINATION", index: 1 }));
+                  dispatch(setFocusArea("PAGINATION"));
                   if (page < totalPages) dispatch(setPage(page + 1));
                 }}
               >

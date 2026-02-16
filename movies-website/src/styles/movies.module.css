@@ -1,126 +1,169 @@
-.movieGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 עמודות */
-  gap: 40px;
-  padding: 20px;
+/* styles/movies.module.css */
+
+.container {
+  min-height: 100vh;
+  background-color: #141414; /* רקע שחור עמוק */
+  color: #fff;
+  padding: 20px 40px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
-/* התפריט העליון */
+/* === HEADER AREA (SEARCH + NAV) === */
+.headerWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(to bottom, #141414 90%, transparent);
+  z-index: 100;
+  padding-bottom: 20px;
+}
+
+.searchWrapper {
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
 .menuBar {
   display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-bottom: 30px;
+  gap: 30px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
 }
 
 .navBtn {
-  padding: 10px 20px;
-  border: 2px solid #444;
-  background: #333;
-  color: white;
-  border-radius: 5px;
-  font-size: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #808080;
+  cursor: pointer;
+  padding: 10px 15px;
   transition: all 0.2s ease;
+  position: relative;
+  letter-spacing: 1px;
 }
 
-/* הסטייל שמופעל כשהכפתור ב"פוקוס" של המקלדת */
-.navBtn.active {
-  background: #007bff;
-  border-color: #fff;
-  outline: 4px solid rgba(0, 123, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+/* כפתור שנבחר (הקטגוריה המוצגת) */
+.selected {
+  color: white;
+  font-weight: 700;
 }
 
-/* ===== Pagination Container ===== */
-.paginationWrapper {
-  margin-top: 30px;
+.selected::after {
+  content: "";
+  position: absolute;
+  bottom: -6px; /* יושב על הקו של התפריט */
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #e50914; /* אדום נטפליקס */
+}
+
+/* כפתור שהפוקוס עליו (מקלדת/עכבר) */
+.focused {
+  color: #141414;
+  background-color: white;
+  border-radius: 4px;
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.focused::after {
+  display: none; /* מסתיר את הקו האדום כשיש פוקוס כדי שיהיה נקי */
+}
+
+/* === GRID === */
+.movieGrid {
+  display: grid;
+  /* חובה 4 עמודות כדי להתאים ללוגיקה של המקלדת! */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 20px; /* צמצום המרווח בין הגריד לפג'ינציה */
+}
+
+.noResults {
   text-align: center;
+  font-size: 1.5rem;
+  color: #666;
+  margin-top: 50px;
+}
+
+/* === PAGINATION === */
+/* styles/movies.module.css */
+
+.paginationWrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
+  /* מרווח ביטחון בתחתית הדף */
+  margin: 20px 0;
+
+  /* הוספת scroll-margin כדי שהמקלדת תדע לגלול לפה */
+  scroll-margin-bottom: 100px;
+  width: 100%;
 }
 
-/* ===== Buttons ===== */
 .paginationBtn {
-  padding: 8px 18px;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-color: #1e1e1e;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  font-size: 14px;
+  padding: 10px 25px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
-/* Hover */
-.paginationBtn:hover:not(:disabled) {
-  background-color: #2d2d2d;
-}
-
-/* Disabled */
 .paginationBtn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* Active (כשיש focus מהמקלדת) */
 .paginationActive {
-  border-color: #00bfff;
-  box-shadow: 0 0 10px rgba(0, 191, 255, 0.6);
-  transform: scale(1.05);
+  background-color: #e50914; /* אדום נטפליקס */
+  transform: scale(1.15);
+  border-color: white;
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
 }
 
-/* Page text */
 .paginationInfo {
-  font-size: 14px;
-  color: #ccc;
+  color: #999;
+  font-size: 0.9rem;
 }
 
-/* --- עיצוב טעינה גדול ומרכזי --- */
-
-/* המיכל שעוטף את הספינר */
+/* === LOADING === */
 .loadingContainer {
-  /* שימוש בפלקס כדי למרכז בכל הכיוונים */
+  height: 50vh;
   display: flex;
-  justify-content: center; /* מירכוז אופקי */
-  align-items: center; /* מירכוז אנכי */
-
-  /* תופס את כל הרוחב ולפחות 70% מגובה המסך */
-  width: 100%;
-  min-height: 70vh;
-
-  /* אופציונלי: רקע עדין כדי להבליט את איזור הטעינה */
-  /* background-color: rgba(0, 0, 0, 0.02); */
+  justify-content: center;
+  align-items: center;
 }
 
-/* הספינר עצמו */
 .spinner {
-  /* גודל גדול משמעותית */
-  width: 100px; /* היה 50px */
-  height: 100px; /* היה 50px */
-
-  /* גבולות עבים יותר שיתאימו לגודל */
-  border: 10px solid #e0e0e0; /* צבע המסלול (אפור בהיר) */
-  border-top: 10px solid #3498db; /* הצבע המסתובב (כחול) */
-
-  /* הופך אותו לעיגול */
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: #e50914;
   border-radius: 50%;
-
-  /* אנימציית הסיבוב - מעט איטית יותר לגודל הזה */
-  animation: spin 1.2s linear infinite;
-
-  /* אופציונלי: צל עדין כדי לתת עומק */
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
 }
 
-/* הגדרת האנימציה (נשאר אותו דבר) */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
+  }
+}
+
+/* רספונסיביות בסיסית - שים לב שזה עלול לשבור ניווט מקלדת אם העמודות משתנות */
+@media (max-width: 768px) {
+  .movieGrid {
+    grid-template-columns: repeat(2, 1fr);
+
+    /* הערה: אם תשני ל-2 עמודות, צריך לעדכן את gridColumns ב-Redux ל-2 */
   }
 }

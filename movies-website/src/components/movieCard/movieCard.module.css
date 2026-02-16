@@ -1,30 +1,67 @@
+/* movieCard.module.css */
+
 .card {
-  /* background-color: #f0f0f0; */
-  border-radius: 10px;
+  position: relative;
+  background-color: #1a1a1a;
+  border-radius: 8px;
   overflow: hidden;
-  text-align: center;
-  transition: transform 0.2s;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* חשוב לניווט שלך: */
+  scroll-margin-top: 180px;
+  scroll-margin-bottom: 50px;
+  /* יחס גובה-רוחב של פוסטר קולנועי סטנדרטי */
+  aspect-ratio: 2 / 3;
+  display: flex;
+  flex-direction: column;
 }
 
-.card:hover {
-  transform: scale(1.05);
-}
-
+/* תמונת הפוסטר */
 .card img {
   width: 100%;
-  height: 300px;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
+/* הכותרת - מופיעה כ-Overlay על התמונה */
 .card h2 {
-  margin: 10px 0;
-  font-size: 18px;
-  padding: 0 5px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 20px 10px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+  text-align: center;
+  opacity: 0; /* מוסתר כברירת מחדל */
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.card.active {
-  outline: 4px solid #007bff; /* outline עדיף על border כי הוא לא מזיז את האלמנטים */
+/* === מצב Active (פוקוס מקלדת או Hover) === */
+.active {
   transform: scale(1.05);
   z-index: 10;
-  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  border: 3px solid #e50914; /* מסגרת אדומה בסגנון נטפליקס */
+}
+
+.active img {
+  transform: scale(1.1); /* זום קטן לתמונה */
+}
+
+.active h2 {
+  opacity: 1; /* הכותרת נחשפת בבחירה */
+}
+
+/* במצב שלא בחור, נרצה עמעום קל כדי שהנבחר יבלוט */
+:not(.active).card {
+  opacity: 0.7;
 }

@@ -1,39 +1,177 @@
+/* MoviePage.module.css */
+
 .page {
-  padding: 40px;
+  position: relative;
+  min-height: 100vh;
+  background-color: #141414; /* רקע כהה */
+  color: #fff;
+  overflow-x: hidden;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* תמונת הרקע הענקית */
+.backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70vh; /* תופס 70% מהגובה */
+  background-size: cover;
+  background-position: center top;
+  z-index: 0;
+  /* אפקט עמעום כדי שהטקסט יהיה קריא */
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+}
+
+/* שכבת ההכהיה מעל תמונת הרקע */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70vh;
+  background: linear-gradient(to right, #141414 10%, rgba(20, 20, 20, 0.6) 50%, rgba(20, 20, 20, 0) 100%);
+  z-index: 1;
+}
+
+/* הקונטיינר הראשי של התוכן */
+.contentContainer {
+  position: relative;
+  z-index: 2; /* מעל הרקע */
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.hero {
+  padding: 100px 20px 40px;
   display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
 }
 
-.hero img {
+/* הפוסטר */
+.poster {
   width: 300px;
-  border-radius: 10px;
-  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
+.poster:hover {
+  transform: scale(1.02);
+}
+
+/* אזור הטקסט */
 .info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  margin-top: 20px;
+  max-width: 700px;
 }
 
-.info h1 {
-  font-size: 2rem;
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
   margin-bottom: 10px;
+  line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-.info p {
-  margin: 5px 0;
-  line-height: 1.5;
+.metaData {
+  display: flex;
+  gap: 15px;
+  font-size: 1.1rem;
+  color: #a3a3a3;
+  margin-bottom: 25px;
+  align-items: center;
+}
+
+.tag {
+  border: 1px solid #a3a3a3;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
 }
 
 .overview {
-  margin-top: 20px;
-  font-size: 1rem;
-  color: #555;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #e5e5e5;
+  margin-bottom: 30px;
+  max-width: 90%;
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+}
+
+/* כפתורים מעוצבים */
+.btn {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn {
+  background-color: #e50914; /* אדום נטפליקס */
+  color: white;
+}
+
+.primaryBtn:hover {
+  background-color: #b20710;
+}
+
+.secondaryBtn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(5px);
+}
+
+.secondaryBtn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* התאמה למובייל */
+@media (max-width: 768px) {
+  .contentContainer {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+    text-align: center;
+  }
+
+  .backdrop {
+    height: 40vh;
+  }
+
+  .overlay {
+    height: 40vh;
+    background: linear-gradient(to top, #141414 10%, rgba(20, 20, 20, 0) 100%);
+  }
+  
+  .poster {
+    width: 200px;
+    margin-top: 100px; /* דוחף למטה כדי שלא יוסתר ע"י הרקע */
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .metaData {
+    justify-content: center;
+  }
+  
+  .overview {
+    margin: 0 auto 30px;
+  }
+  
+  .actions {
+    justify-content: center;
+  }
 }

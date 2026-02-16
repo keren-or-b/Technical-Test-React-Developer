@@ -1,22 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./movieCard.module.css";
 import { memo, useEffect, useRef } from "react";
+
 const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
   const cardRef = useRef(null);
 
-  const PLACEHOLDER_IMAGE = "/placeholder-movie.png";
+  const PLACEHOLDER_IMAGE ="/placeholder-movie.svg"
 
   useEffect(() => {
     if (isActive && cardRef.current) {
-      cardRef.current.scrollIntoView({
-        block: "center",
-      });
+      const isFirstRow = index < 4;
+
+      if (isFirstRow) {
+        // פתרון רדיקלי לשורה ראשונה: גלילה של כל הדף ל-0
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else {
+        // שאר השורות ממשיכות כרגיל
+        cardRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest",
+        });
+      }
     }
-  }, [isActive]);
+  }, [isActive, index]);
 
   const handleMouseMove = () => {
-    // התנאי החשוב שלך נכנס כאן!
-    // אם הכרטיס כבר אקטיבי - אל תעשה כלום.
     if (!isActive) {
       onHover(index);
     }
@@ -24,22 +36,26 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
 
   return (
     <div
-      ref={cardRef} // חברי את הרפרנס
+      ref={cardRef}
       className={`${styles.card} ${isActive ? styles.active : ""}`}
-      key={movie.id}
       onMouseMove={handleMouseMove}
       onClick={() => onClick(movie.id)}
-
-      // onClick={handleClick}
     >
       <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : PLACEHOLDER_IMAGE
+        }
         alt={movie.title}
-        loading="lazy" // שיפור ביצועים נוסף: טעינת תמונות עצלה
+        loading="lazy"
         onError={(e) => {
-          e.target.src = PLACEHOLDER_IMAGE;
+          if (e.target.src !== PLACEHOLDER_IMAGE) {
+            e.target.src = PLACEHOLDER_IMAGE;
+          }
         }}
       />
+      {/* הכותרת תופיע רק ב-Active בזכות ה-CSS */}
       <h2>{movie.title}</h2>
     </div>
   );

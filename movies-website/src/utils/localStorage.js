@@ -1,5 +1,6 @@
 // utils/localStorage.js
-const FAVORITES_KEY = 'movieFavorites';
+// const FAVORITES_KEY = 'movieFavorites';
+const FAVORITES_KEY = 'favorites';
 
 export const localStorageUtils = {
   // קריאה מהזיכרון (רק בטעינת האפליקציה)
