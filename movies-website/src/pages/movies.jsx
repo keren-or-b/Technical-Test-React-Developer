@@ -1,8 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-// Redux & Logic
 import {
   appStarted,
   setView,
@@ -16,13 +14,10 @@ import {
   selectCurrentView,
   selectPage,
   selectTotalPages,
-  selectGridColumns
+  selectGridColumns,
 } from "../redux/movies/movieSlice";
-
-import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation"; // שים לב לתיקון האות הקטנה ב-file name אם צריך
-import { VIEW_CATEGORIES } from "../services/navigationService";
-
-// Components & Styles
+import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation";
+import { VIEW_CATEGORIES } from "../utils/constants";
 import MovieCard from "../components/movieCard/movieCard";
 import SearchInput from "../components/searchInput";
 import styles from "../styles/movies.module.css";
@@ -32,7 +27,6 @@ const MoviesPage = () => {
   const navigate = useNavigate();
   const navBarRef = useRef(null);
 
-  // Selectors
   const movies = useSelector(selectCurrentMovies);
   const loading = useSelector(selectIsLoading);
   const focusArea = useSelector(selectFocusArea);
@@ -42,7 +36,6 @@ const MoviesPage = () => {
   const totalPages = useSelector(selectTotalPages);
   const gridColumns = useSelector(selectGridColumns);
 
-  // Keyboard Hook
   useKeyboardNavigation();
 
   // Initial Load
@@ -57,29 +50,24 @@ const MoviesPage = () => {
       });
     }
     if (focusArea === "PAGINATION") {
-      // מציאת האלמנט של הפג'ינציה וגלילה אליו
       const paginationElement = document.querySelector(
         `.${styles.paginationWrapper}`,
       );
       if (paginationElement) {
         paginationElement.scrollIntoView({
           behavior: "smooth",
-          block: "end", // גולל כך שהפג'ינציה תהיה בתחתית המסך
+          block: "end",
         });
       }
     }
   }, [focusArea]);
 
   useEffect(() => {
-    // אם חזרנו מדף פרטים, ה-Store עדיין "תקוע" על MOVIE_DETAILS
-    // אנחנו משנים אותו ידנית חזרה ל-MOVIE_GRID
-    // (ה-Index נשמר בזיכרון, אז הפוקוס יחזור בדיוק לסרט שממנו יצאנו!)
     if (focusArea === "MOVIE_DETAILS") {
       dispatch(setFocusArea("MOVIE_GRID"));
     }
   }, [focusArea, dispatch]);
 
-  // Auto-Select on Hover Logic
   useEffect(() => {
     let timer;
     if (focusArea === "NAV_BAR") {
@@ -93,16 +81,21 @@ const MoviesPage = () => {
     return () => clearTimeout(timer);
   }, [focusArea, focusIndex, currentView, dispatch]);
 
-  // Handlers
-  const handleNavHover = (index) => {
-    dispatch(setFocusArea("NAV_BAR"));
-    dispatch(setFocusIndex(index));
-  };
+  const handleNavHover = useCallback(
+    (index) => {
+      dispatch(setFocusArea("NAV_BAR"));
+      dispatch(setFocusIndex(index));
+    },
+    [dispatch],
+  );
 
-  const handleNavClick = (viewName) => {
-    dispatch(setView(viewName));
-    dispatch(setFocusArea("MOVIE_GRID"));
-  };
+  const handleNavClick = useCallback(
+    (viewName) => {
+      dispatch(setView(viewName));
+      dispatch(setFocusArea("MOVIE_GRID"));
+    },
+    [dispatch],
+  );
 
   const handleCardHover = useCallback(
     (index) => {
@@ -119,14 +112,16 @@ const MoviesPage = () => {
     [navigate],
   );
 
-  const handlePaginationHover = (index) => {
-    dispatch(setFocusArea("PAGINATION"));
-    dispatch(setFocusIndex(index));
-  };
+  const handlePaginationHover = useCallback(
+    (index) => {
+      dispatch(setFocusArea("PAGINATION"));
+      dispatch(setFocusIndex(index));
+    },
+    [dispatch],
+  );
 
   return (
     <div className={styles.container}>
-      {/* === HEADER SECTION (Search + Nav) === */}
       <div className={styles.headerWrapper}>
         <div className={styles.searchWrapper}>
           <SearchInput />
@@ -136,7 +131,6 @@ const MoviesPage = () => {
           {VIEW_CATEGORIES.map((viewName, index) => {
             const label = viewName.replace("_", " ").toUpperCase();
 
-            // לוגיקת Active/Focus
             const isSelected = currentView === viewName;
             const isFocused = focusArea === "NAV_BAR" && focusIndex === index;
 
@@ -166,8 +160,7 @@ const MoviesPage = () => {
       ) : (
         <>
           {/* === MOVIE GRID === */}
-          {/* כאן אני מניח ש-MovieCard מטפל בעיצוב של עצמו, 
-              אבל הגריד ב-CSS מסדר אותם ב-4 עמודות */}
+
           <div
             className={styles.movieGrid}
             style={{
@@ -191,10 +184,8 @@ const MoviesPage = () => {
           </div>
 
           {/* === PAGINATION === */}
-          {/* הצג פג'ינציה אם אנחנו לא במועדפים (או אם החזרת את הלוגיקה למועדפים) */}
           {currentView !== "favorites" && movies.length > 0 && (
             <div className={styles.paginationWrapper}>
-              {/* Prev */}
               <button
                 className={`${styles.paginationBtn} ${
                   focusArea === "PAGINATION" && focusIndex === 0
@@ -215,7 +206,6 @@ const MoviesPage = () => {
                 Page {page} of {totalPages}
               </span>
 
-              {/* Next */}
               <button
                 className={`${styles.paginationBtn} ${
                   focusArea === "PAGINATION" && focusIndex === 1

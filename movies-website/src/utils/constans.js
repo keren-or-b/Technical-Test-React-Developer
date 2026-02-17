@@ -1,1 +1,0 @@
-export const DEFAULT_GRID_COLUMNS = 4; // <--- המקום היחיד שבו המספר מוגדר!

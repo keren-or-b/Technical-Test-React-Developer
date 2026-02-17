@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// ייבוא הפעולות והסלקטורים
 import {
   setSearchTerm,
   selectFocusArea,
@@ -9,8 +8,6 @@ import {
   setFocusIndex,
   selectCurrentView,
 } from "../redux/movies/movieSlice";
-
-// ייבוא העיצוב החדש
 import styles from "./searchInput.module.css";
 import { getIndexByView } from "../services/navigationService";
 
@@ -22,7 +19,6 @@ const SearchInput = () => {
   const searchTerm = useSelector(selectSearchTerm);
   const currentView = useSelector(selectCurrentView);
 
-  // סנכרון פוקוס
   useEffect(() => {
     if (focusArea === "SEARCH") {
       inputRef.current?.focus();
@@ -32,15 +28,13 @@ const SearchInput = () => {
   }, [focusArea]);
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
-      e.preventDefault(); // מונע התנהגות דפדפן ברירת מחדל
+      e.preventDefault();
 
-      // הסרת הפוקוס מה-DOM
       inputRef.current?.blur();
 
-      // ביצוע פעולות הניווט (בדיוק כמו ב-Hook)
-      dispatch(setSearchTerm("")); // איפוס הטקסט
-      dispatch(setFocusArea("NAV_BAR")); // מעבר ל-NavBar
-      dispatch(setFocusIndex(getIndexByView(currentView))); // סימון הטאב הנכון
+      dispatch(setSearchTerm(""));
+      dispatch(setFocusArea("NAV_BAR"));
+      dispatch(setFocusIndex(getIndexByView(currentView)));
     }
   };
 
@@ -60,10 +54,9 @@ const SearchInput = () => {
           placeholder="Titles, people, genres..."
           value={searchTerm}
           onChange={handleChange}
-          onKeyDown={handleKeyDown} // <--- הוספנו את ההאזנה כאן
+          onKeyDown={handleKeyDown}
           className={`${styles.input} ${isFocused ? styles.focused : ""}`}
         />
-        {/* אייקון חיפוש קטן בצד שמאל */}
         <span className={styles.searchIcon}>🔍</span>
       </div>
     </div>

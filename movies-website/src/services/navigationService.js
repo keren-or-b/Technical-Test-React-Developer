@@ -1,19 +1,13 @@
-export const VIEW_CATEGORIES = ["popular", "now_playing", "favorites"];
+import { VIEW_CATEGORIES } from "../utils/constants";
 
-/**
- * אזורי ניווט
- */
 export const FOCUS_AREAS = {
   SEARCH: "SEARCH",
   NAV_BAR: "NAV_BAR",
   MOVIE_GRID: "MOVIE_GRID",
   PAGINATION: "PAGINATION",
-  MOVIE_DETAILS: "MOVIE_DETAILS", // <--- האזור החדש
+  MOVIE_DETAILS: "MOVIE_DETAILS",
 };
 
-/**
- * כיוונים
- */
 export const DIRECTIONS = {
   UP: "UP",
   DOWN: "DOWN",
@@ -25,29 +19,15 @@ export const DIRECTIONS = {
 // VIEW HELPERS
 // ============================================
 
-/**
- * המרה מאינדקס ל-view name
- */
 export const getViewByIndex = (index) => {
   return VIEW_CATEGORIES[index] || "popular";
 };
 
-/**
- * המרה מ-view name לאינדקס
- */
 export const getIndexByView = (view) => {
   const index = VIEW_CATEGORIES.indexOf(view);
   return index >= 0 ? index : 0;
 };
 
-// ============================================
-// GRID NAVIGATION
-// ============================================
-
-/**
- * חישוב תנועה בגריד
- * @returns {object} { newIndex, shouldChangeArea, newArea }
- */
 export const calculateGridMove = ({
   currentIndex,
   direction,
@@ -60,7 +40,7 @@ export const calculateGridMove = ({
       if (newIndex < totalItems) {
         return { newIndex, shouldChangeArea: false };
       }
-      return { newIndex: currentIndex, shouldChangeArea: false }; // לא זזים
+      return { newIndex: currentIndex, shouldChangeArea: false };
     }
 
     case DIRECTIONS.LEFT: {
@@ -68,16 +48,14 @@ export const calculateGridMove = ({
       if (newIndex >= 0) {
         return { newIndex, shouldChangeArea: false };
       }
-      return { newIndex: currentIndex, shouldChangeArea: false }; // לא זזים
+      return { newIndex: currentIndex, shouldChangeArea: false };
     }
 
     case DIRECTIONS.UP: {
       const newIndex = currentIndex - gridColumns;
       if (newIndex >= 0) {
-        // תנועה בתוך הגריד
         return { newIndex, shouldChangeArea: false };
       }
-      // צריך לעבור ל-NAV_BAR
       return {
         newIndex: currentIndex,
         shouldChangeArea: true,
@@ -105,53 +83,9 @@ export const calculateGridMove = ({
 };
 
 // ============================================
-// AREA TRANSITIONS
-// ============================================
-
-/**
- * קובע לאיזה אזור לעבור מאזור נוכחי
- */
-export const getNextArea = ({ currentArea, direction, hasMovies }) => {
-  const transitions = {
-    [FOCUS_AREAS.SEARCH]: {
-      [DIRECTIONS.DOWN]: hasMovies ? FOCUS_AREAS.NAV_BAR : FOCUS_AREAS.SEARCH,
-      [DIRECTIONS.UP]: FOCUS_AREAS.SEARCH, // נשאר במקום
-    },
-
-    [FOCUS_AREAS.NAV_BAR]: {
-      [DIRECTIONS.UP]: FOCUS_AREAS.SEARCH,
-      [DIRECTIONS.DOWN]: hasMovies
-        ? FOCUS_AREAS.MOVIE_GRID
-        : FOCUS_AREAS.NAV_BAR,
-      [DIRECTIONS.LEFT]: FOCUS_AREAS.NAV_BAR, // handled by index
-      [DIRECTIONS.RIGHT]: FOCUS_AREAS.NAV_BAR, // handled by index
-    },
-
-    [FOCUS_AREAS.MOVIE_GRID]: {
-      [DIRECTIONS.UP]: FOCUS_AREAS.NAV_BAR, // או נשאר בגריד - handled by calculateGridMove
-      [DIRECTIONS.DOWN]: FOCUS_AREAS.PAGINATION, // או נשאר בגריד - handled by calculateGridMove
-      [DIRECTIONS.LEFT]: FOCUS_AREAS.MOVIE_GRID, // handled by index
-      [DIRECTIONS.RIGHT]: FOCUS_AREAS.MOVIE_GRID, // handled by index
-    },
-
-    [FOCUS_AREAS.PAGINATION]: {
-      [DIRECTIONS.UP]: hasMovies ? FOCUS_AREAS.MOVIE_GRID : FOCUS_AREAS.NAV_BAR,
-      [DIRECTIONS.DOWN]: FOCUS_AREAS.PAGINATION, // נשאר במקום
-      [DIRECTIONS.LEFT]: FOCUS_AREAS.PAGINATION, // handled by index
-      [DIRECTIONS.RIGHT]: FOCUS_AREAS.PAGINATION, // handled by index
-    },
-  };
-
-  return transitions[currentArea]?.[direction] || currentArea;
-};
-
-// ============================================
 // NAV BAR LOGIC
 // ============================================
 
-/**
- * תנועה ב-Nav Bar (בין קטגוריות)
- */
 export const calculateNavBarMove = ({ currentIndex, direction }) => {
   const maxIndex = VIEW_CATEGORIES.length - 1;
 
@@ -169,11 +103,8 @@ export const calculateNavBarMove = ({ currentIndex, direction }) => {
 // PAGINATION LOGIC
 // ============================================
 
-/**
- * תנועה ב-Pagination (Prev/Next)
- */
 export const calculatePaginationMove = ({ currentIndex, direction }) => {
-  const maxIndex = 1; // 0 = Prev, 1 = Next
+  const maxIndex = 1;
 
   switch (direction) {
     case DIRECTIONS.LEFT:
@@ -189,10 +120,6 @@ export const calculatePaginationMove = ({ currentIndex, direction }) => {
 // MAIN NAVIGATION CALCULATOR
 // ============================================
 
-/**
- * פונקציה מרכזית שמחשבת את כל הניווט
- * זה המקום המרכזי שמחליף את moveFocus!
- */
 export const calculateNavigation = ({
   currentArea,
   currentIndex,
@@ -201,7 +128,7 @@ export const calculateNavigation = ({
   totalMovies,
   hasMovies,
   currentView,
-  isPaginationVisible, // <--- הפרמטר החדש שקיבלנו
+  isPaginationVisible,
 }) => {
   switch (currentArea) {
     case FOCUS_AREAS.SEARCH: {
@@ -260,7 +187,6 @@ export const calculateNavigation = ({
         }
         let targetIndex = 0;
 
-        // אם אנחנו עולים ל-NAV_BAR, נחשב את האינדקס של הטאב הנוכחי
         if (gridMove.newArea === FOCUS_AREAS.NAV_BAR) {
           targetIndex = getIndexByView(currentView);
         }
@@ -286,10 +212,6 @@ export const calculateNavigation = ({
         return {
           type: "CHANGE_AREA",
           newArea: hasMovies ? FOCUS_AREAS.MOVIE_GRID : FOCUS_AREAS.NAV_BAR,
-
-          // === התיקון ===
-          // אם עוברים לגריד -> הולכים לסרט האחרון (totalMovies - 1)
-          // אם עוברים ל-Nav -> הולכים להתחלה (0)
           newIndex: hasMovies ? totalMovies - 1 : 0,
         };
       }
@@ -323,10 +245,6 @@ export const calculateNavigation = ({
 // ============================================
 // ENTER ACTIONS
 // ============================================
-
-/**
- * מה לעשות כש-Enter נלחץ
- */
 export const getEnterAction = ({
   currentArea,
   currentIndex,
@@ -373,7 +291,7 @@ export const getEnterAction = ({
         return { type: "TOGGLE_FAVORITE_DETAILS" }; // הוספה למועדפים
       }
       if (currentIndex === 1) {
-        return { type: "GO_BACK" }; // חזרה אחורה
+        return { type: "GO_BACK" };
       }
       return { type: "NO_ACTION" };
     }
@@ -382,20 +300,3 @@ export const getEnterAction = ({
       return { type: "NO_ACTION" };
   }
 };
-
-// ============================================
-// ESCAPE ACTION
-// ============================================
-
-/**
- * מה לעשות כש-Escape נלחץ
- */
-// export const getEscapeAction = ({ currentArea }) => {
-//   // תמיד חוזר ל-MOVIE_GRID
-//   if (currentArea !== FOCUS_AREAS.MOVIE_GRID) {
-//     return {
-//       type: "RESET_TO_GRID",
-//     };
-//   }
-//   return { type: "NO_ACTION" };
-// };

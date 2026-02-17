@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import { selectGridColumns } from "../../redux/movies/movieSlice";
-import { DEFAULT_GRID_COLUMNS } from "../../utils/constans";
 import styles from "./movieCard.module.css";
 import { memo, useEffect, useRef } from "react";
 
@@ -17,13 +16,11 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
       const isFirstRow = index < gridColumns;
 
       if (isFirstRow) {
-        // פתרון רדיקלי לשורה ראשונה: גלילה של כל הדף ל-0
         window.scrollTo({
           top: 0,
           behavior: "smooth",
         });
       } else {
-        // שאר השורות ממשיכות כרגיל
         cardRef.current.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
@@ -60,7 +57,6 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
           }
         }}
       />
-      {/* הכותרת תופיע רק ב-Active בזכות ה-CSS */}
       <h2>{movie.title}</h2>
     </div>
   );

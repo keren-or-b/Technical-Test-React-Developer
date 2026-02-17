@@ -1,5 +1,3 @@
-// src/utils/rateLimiter.js
-
 class RateLimiter {
   constructor(maxRequests = 5, timeWindow = 10000) {
     this.maxRequests = maxRequests;
@@ -33,6 +31,4 @@ class RateLimiter {
     this.requests = [];
   }
 }
-
-// ✅ ייצוא ה-Instance (Singleton)
 export const searchRateLimiter = new RateLimiter(5, 10000);
