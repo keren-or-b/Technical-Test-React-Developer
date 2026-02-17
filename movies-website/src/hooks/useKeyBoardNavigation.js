@@ -20,9 +20,6 @@ import {
   selectTotalPages,
   selectHasMovies,
   selectCurrentView,
-  setSearchTerm,
-} from "../redux/movies/movieSlice";
-import {
   selectMovieDetails, // <--- לוודא שזה קיים ב-Slice
   toggleFavorite,
 } from "../redux/movies/movieSlice";
@@ -95,6 +92,10 @@ export const useKeyboardNavigation = () => {
           }
           return;
         }
+        if (focusArea === "MOVIE_DETAILS") {
+          navigate(-1);
+          return;
+        }
 
         return;
       }
@@ -118,6 +119,7 @@ export const useKeyboardNavigation = () => {
       }
     },
     [
+      // 1. משתני State בסיסיים
       focusArea,
       focusIndex,
       movies,
@@ -126,7 +128,14 @@ export const useKeyboardNavigation = () => {
       hasMovies,
       currentView,
       movieDetails,
+
+      // 2. פונקציות חיצוניות
       dispatch,
+      navigate, // ✅ הוספנו (חובה לניווט)
+
+      // 3. משתני חישוב קריטיים
+      gridColumns, // ✅ הוספנו (קריטי לרספונסיביות)
+      isPaginationVisible,
     ],
   );
 
@@ -194,7 +203,6 @@ export const useKeyboardNavigation = () => {
       totalPages,
     });
 
-
     switch (enterAction.type) {
       case "SELECT_VIEW":
         dispatch(setView(enterAction.view));
@@ -206,13 +214,18 @@ export const useKeyboardNavigation = () => {
         break;
 
       case "PREVIOUS_PAGE":
-        dispatch(setPage(page - 1));
+        // ✅ שימוש ב-setPage עם חישוב
+        if (page > 1) {
+          dispatch(setPage(page - 1));
+        }
         break;
 
       case "NEXT_PAGE":
-        dispatch(setPage(page + 1));
+        // ✅ שימוש ב-setPage עם חישוב
+        if (page < totalPages) {
+          dispatch(setPage(page + 1));
+        }
         break;
-
       case "TOGGLE_FAVORITE_DETAILS":
         if (movieDetails) {
           dispatch(toggleFavorite(movieDetails));

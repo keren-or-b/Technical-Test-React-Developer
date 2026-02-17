@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { localStorageUtils } from "../../utils/localStorage";
-import { getViewByIndex } from "../../services/navigationService";
+import { DEFAULT_GRID_COLUMNS } from "../../utils/constans";
 
 const initialState = {
   movies: [],
-  gridColumns: 4,
+  gridColumns: DEFAULT_GRID_COLUMNS,
   movieDetails: null,
 
   favoriteIds: localStorageUtils.getFavoritesIds(),
@@ -64,7 +64,11 @@ const movieSlice = createSlice({
     },
     // שינוי עמוד
     setPage: (state, action) => {
-      state.page = action.payload;
+      const newPage = action.payload;
+      // הגנה בסיסית בתוך ה-Reducer (למרות שגם ה-UI מגן)
+      if (newPage >= 1 && newPage <= state.totalPages) {
+        state.page = newPage;
+      }
     },
     // שינוי searchTerm
     setSearchTerm: (state, action) => {
@@ -133,10 +137,6 @@ const movieSlice = createSlice({
       localStorageUtils.saveFavoritesIds(state.favoriteIds);
     },
   },
-  // ==========================================
-  // clearError: (state) => {
-  //   state.error = null;
-  // },
 });
 export const {
   appStarted,
@@ -148,16 +148,13 @@ export const {
   fetchMovieDetailsFailure,
   setView,
   setPage,
-  selectCategory,
+  
   setSearchTerm,
-  selectCategoryByFocus,
   setFocusArea,
   incrementFocusIndex,
   decrementFocusIndex,
   setFocusIndex,
-  // moveGridFocus,
   toggleFavorite,
-  clearError,
 } = movieSlice.actions;
 
 // Basic selectors
@@ -186,12 +183,12 @@ export const selectIsFavorite = (state, movieId) =>
   state.movies.favoriteIds.includes(movieId);
 
 export const selectTotalPages = (state) => {
-  const { view, totalPages, favorites } = state.movies;
+  const { view, totalPages, favoriteIds } = state.movies;
 
   // במועדפים: מחשבים כמה עמודים יש סה"כ לפי אורך המערך
   if (view === "favorites") {
-    if (!favorites || favorites.length === 0) return 1;
-    return Math.ceil(favorites.length / 20);
+    if (!favoriteIds || favoriteIds.length === 0) return 1;
+    return Math.ceil(favoriteIds.length / 20);
   }
 
   return totalPages;

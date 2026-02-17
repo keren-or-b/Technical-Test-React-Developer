@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/MoviePage.module.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,6 +7,8 @@ import {
   selectFocusArea,
   selectFocusIndex,
   selectIsFavorite,
+  selectIsLoading,
+  selectMovieDetails,
   setFocusArea,
   setFocusIndex,
   toggleFavorite,
@@ -18,7 +20,8 @@ const MovieDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { movieDetails, loading, error } = useSelector((state) => state.movies);
+  const movieDetails = useSelector(selectMovieDetails);
+  const loading = useSelector(selectIsLoading);
   const focusArea = useSelector(selectFocusArea);
   const focusIndex = useSelector(selectFocusIndex);
 
@@ -37,16 +40,6 @@ const MovieDetails = () => {
       dispatch(fetchMovieDetailsRequest({ id }));
     }
   }, [id, dispatch]);
-
- 
-
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape") navigate(-1);
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [navigate]);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
   if (!movieDetails) return null;

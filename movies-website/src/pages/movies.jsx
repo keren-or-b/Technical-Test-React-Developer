@@ -16,6 +16,7 @@ import {
   selectCurrentView,
   selectPage,
   selectTotalPages,
+  selectGridColumns,
 } from "../redux/movies/movieSlice";
 
 import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation"; // שים לב לתיקון האות הקטנה ב-file name אם צריך
@@ -39,6 +40,7 @@ const MoviesPage = () => {
   const currentView = useSelector(selectCurrentView);
   const page = useSelector(selectPage);
   const totalPages = useSelector(selectTotalPages);
+  const gridColumns = useSelector(selectGridColumns);
 
   // Keyboard Hook
   useKeyboardNavigation();
@@ -68,7 +70,7 @@ const MoviesPage = () => {
     }
   }, [focusArea]);
 
-   useEffect(() => {
+  useEffect(() => {
     // אם חזרנו מדף פרטים, ה-Store עדיין "תקוע" על MOVIE_DETAILS
     // אנחנו משנים אותו ידנית חזרה ל-MOVIE_GRID
     // (ה-Index נשמר בזיכרון, אז הפוקוס יחזור בדיוק לסרט שממנו יצאנו!)
@@ -166,7 +168,12 @@ const MoviesPage = () => {
           {/* === MOVIE GRID === */}
           {/* כאן אני מניח ש-MovieCard מטפל בעיצוב של עצמו, 
               אבל הגריד ב-CSS מסדר אותם ב-4 עמודות */}
-          <div className={styles.movieGrid}>
+          <div
+            className={styles.movieGrid}
+            style={{
+              gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+            }}
+          >
             {movies.length > 0 ? (
               movies.map((movie, index) => (
                 <MovieCard
@@ -198,7 +205,7 @@ const MoviesPage = () => {
                 onMouseEnter={() => handlePaginationHover(0)}
                 onClick={() => {
                   dispatch(setFocusArea("PAGINATION"));
-                  if (page > 1) dispatch(setPage(page - 1));
+                  dispatch(setPage(page - 1));
                 }}
               >
                 Prev
@@ -219,7 +226,7 @@ const MoviesPage = () => {
                 onMouseEnter={() => handlePaginationHover(1)}
                 onClick={() => {
                   dispatch(setFocusArea("PAGINATION"));
-                  if (page < totalPages) dispatch(setPage(page + 1));
+                  dispatch(setPage(page + 1));
                 }}
               >
                 Next

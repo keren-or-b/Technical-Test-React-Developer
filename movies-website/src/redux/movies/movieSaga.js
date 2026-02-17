@@ -33,7 +33,6 @@ function* fetchMovieSafe(id) {
   } catch (error) {
     // במקרה של שגיאה (למשל 404), לא זורקים Error אלא מחזירים null
     // זה מונע מכל ה-Promise.all להיכשל
-    console.warn(`Skipping movie ID ${id}:`, error.message);
     return null;
   }
 }

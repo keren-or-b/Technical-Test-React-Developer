@@ -1,15 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectGridColumns } from "../../redux/movies/movieSlice";
+import { DEFAULT_GRID_COLUMNS } from "../../utils/constans";
 import styles from "./movieCard.module.css";
 import { memo, useEffect, useRef } from "react";
+
+const PLACEHOLDER_IMAGE = "https://via.placeholder.com/500x750?text=No+Image";
 
 const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
   const cardRef = useRef(null);
 
-  const PLACEHOLDER_IMAGE ="/placeholder-movie.svg"
+  const gridColumns = useSelector(selectGridColumns);
 
   useEffect(() => {
     if (isActive && cardRef.current) {
-      const isFirstRow = index < 4;
+      const isFirstRow = index < gridColumns;
 
       if (isFirstRow) {
         // פתרון רדיקלי לשורה ראשונה: גלילה של כל הדף ל-0
