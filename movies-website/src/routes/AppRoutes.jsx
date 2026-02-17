@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import MoviesPage from "../pages/movies.jsx";
+import MoviesPage from "../pages/MoviesPage.jsx";
 import MovieDetails from "../pages/MovieDetails.jsx";
 
 export default function AppRoutes() {

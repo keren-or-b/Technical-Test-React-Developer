@@ -18,8 +18,8 @@ import {
 } from "../redux/movies/movieSlice";
 import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation";
 import { VIEW_CATEGORIES } from "../utils/constants";
-import MovieCard from "../components/movieCard/movieCard";
-import SearchInput from "../components/searchInput";
+import MovieCard from "../components/movieCard/MovieCard";
+import SearchInput from "../components/searchInput/SearchInput";
 import styles from "../styles/movies.module.css";
 
 const MoviesPage = () => {

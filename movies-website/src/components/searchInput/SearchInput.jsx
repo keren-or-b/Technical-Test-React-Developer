@@ -7,9 +7,9 @@ import {
   setFocusArea,
   setFocusIndex,
   selectCurrentView,
-} from "../redux/movies/movieSlice";
+} from "../../redux/movies/movieSlice";
 import styles from "./searchInput.module.css";
-import { getIndexByView } from "../services/navigationService";
+import { getIndexByView } from "../../services/navigationService";
 
 const SearchInput = () => {
   const inputRef = useRef(null);
