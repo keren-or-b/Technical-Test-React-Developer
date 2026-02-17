@@ -20,14 +20,20 @@ import {
   selectTotalPages,
   selectHasMovies,
   selectCurrentView,
+  setSearchTerm,
+} from "../redux/movies/movieSlice";
+import {
+  selectMovieDetails, // <--- לוודא שזה קיים ב-Slice
+  toggleFavorite,
 } from "../redux/movies/movieSlice";
 
 // Navigation service
 import {
   calculateNavigation,
   getEnterAction,
-  getEscapeAction,
+  // getEscapeAction,
   DIRECTIONS,
+  getIndexByView,
 } from "../services/navigationService";
 
 export const useKeyboardNavigation = () => {
@@ -43,7 +49,7 @@ export const useKeyboardNavigation = () => {
   const totalPages = useSelector(selectTotalPages);
   const hasMovies = useSelector(selectHasMovies);
   const currentView = useSelector(selectCurrentView); // <--- שליפת ה-View הנוכחי
-
+  const movieDetails = useSelector(selectMovieDetails);
   const isPaginationVisible = currentView !== "favorites" && totalPages > 1;
 
   // ============================================
@@ -62,13 +68,34 @@ export const useKeyboardNavigation = () => {
       // ============================================
       // ESCAPE - חזרה לגריד
       // ============================================
+      // ============================================
+      // ESCAPE - המימוש המתוקן והסופי
+      // ============================================
       if (key === "Escape") {
         event.preventDefault();
-        const escapeAction = getEscapeAction({ currentArea: focusArea });
 
-        if (escapeAction.type === "RESET_TO_GRID") {
+        // 1. תרחיש פג'ינציה -> עולה לסוף הגריד
+        if (focusArea === "PAGINATION") {
           dispatch(setFocusArea("MOVIE_GRID"));
+          const lastIndex = movies.length > 0 ? movies.length - 1 : 0;
+          dispatch(setFocusIndex(lastIndex));
+          return;
         }
+
+        // 3. תרחיש גריד
+        if (focusArea === "MOVIE_GRID") {
+          if (focusIndex > 0) {
+            // אם אנחנו לא בהתחלה -> קפוץ להתחלה
+            dispatch(setFocusIndex(0));
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            // אם אנחנו כבר ב-0 -> עולה ל-NavBar לטאב הפעיל
+            dispatch(setFocusArea("NAV_BAR"));
+            dispatch(setFocusIndex(getIndexByView(currentView)));
+          }
+          return;
+        }
+
         return;
       }
 
@@ -90,7 +117,17 @@ export const useKeyboardNavigation = () => {
         return;
       }
     },
-    [focusArea, focusIndex, movies, page, totalPages, hasMovies],
+    [
+      focusArea,
+      focusIndex,
+      movies,
+      page,
+      totalPages,
+      hasMovies,
+      currentView,
+      movieDetails,
+      dispatch,
+    ],
   );
 
   // ============================================
@@ -116,7 +153,7 @@ export const useKeyboardNavigation = () => {
       totalMovies: movies.length,
       hasMovies,
       currentView,
-      isPaginationVisible
+      isPaginationVisible,
     });
 
     // ביצוע הפעולה לפי התוצאה
@@ -157,6 +194,7 @@ export const useKeyboardNavigation = () => {
       totalPages,
     });
 
+
     switch (enterAction.type) {
       case "SELECT_VIEW":
         dispatch(setView(enterAction.view));
@@ -173,6 +211,16 @@ export const useKeyboardNavigation = () => {
 
       case "NEXT_PAGE":
         dispatch(setPage(page + 1));
+        break;
+
+      case "TOGGLE_FAVORITE_DETAILS":
+        if (movieDetails) {
+          dispatch(toggleFavorite(movieDetails));
+        }
+        break;
+
+      case "GO_BACK":
+        navigate(-1);
         break;
 
       case "NO_ACTION":

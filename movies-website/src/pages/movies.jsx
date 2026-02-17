@@ -68,6 +68,15 @@ const MoviesPage = () => {
     }
   }, [focusArea]);
 
+   useEffect(() => {
+    // אם חזרנו מדף פרטים, ה-Store עדיין "תקוע" על MOVIE_DETAILS
+    // אנחנו משנים אותו ידנית חזרה ל-MOVIE_GRID
+    // (ה-Index נשמר בזיכרון, אז הפוקוס יחזור בדיוק לסרט שממנו יצאנו!)
+    if (focusArea === "MOVIE_DETAILS") {
+      dispatch(setFocusArea("MOVIE_GRID"));
+    }
+  }, [focusArea, dispatch]);
+
   // Auto-Select on Hover Logic
   useEffect(() => {
     let timer;

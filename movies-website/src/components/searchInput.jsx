@@ -5,6 +5,8 @@ import {
   setSearchTerm,
   selectFocusArea,
   selectSearchTerm,
+  setFocusArea,
+  setFocusIndex,
 } from "../redux/movies/movieSlice";
 
 // ייבוא העיצוב החדש
@@ -25,6 +27,19 @@ const SearchInput = () => {
       inputRef.current?.blur();
     }
   }, [focusArea]);
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      e.preventDefault(); // מונע התנהגות דפדפן ברירת מחדל
+
+      // הסרת הפוקוס מה-DOM
+      inputRef.current?.blur();
+
+      // ביצוע פעולות הניווט (בדיוק כמו ב-Hook)
+      dispatch(setSearchTerm("")); // איפוס הטקסט
+      dispatch(setFocusArea("NAV_BAR")); // מעבר ל-NavBar
+      dispatch(setFocusIndex(getIndexByView(currentView))); // סימון הטאב הנכון
+    }
+  };
 
   const handleChange = (e) => {
     dispatch(setSearchTerm(e.target.value));
@@ -42,6 +57,7 @@ const SearchInput = () => {
           placeholder="Titles, people, genres..."
           value={searchTerm}
           onChange={handleChange}
+          onKeyDown={handleKeyDown} // <--- הוספנו את ההאזנה כאן
           className={`${styles.input} ${isFocused ? styles.focused : ""}`}
         />
         {/* אייקון חיפוש קטן בצד שמאל */}

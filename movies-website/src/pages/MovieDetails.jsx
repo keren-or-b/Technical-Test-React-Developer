@@ -2,39 +2,53 @@ import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/MoviePage.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMovieDetailsRequest, toggleFavorite } from "../redux/movies/movieSlice";
+import {
+  fetchMovieDetailsRequest,
+  selectFocusArea,
+  selectFocusIndex,
+  selectIsFavorite,
+  setFocusArea,
+  setFocusIndex,
+  toggleFavorite,
+} from "../redux/movies/movieSlice";
+import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation";
 
 const MovieDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 1. שליפת הנתונים מה-Store
-  const { movieDetails, loading, error, favorites } = useSelector(
-    (state) => state.movies
-  );
+  const { movieDetails, loading, error } = useSelector((state) => state.movies);
+  const focusArea = useSelector(selectFocusArea);
+  const focusIndex = useSelector(selectFocusIndex);
 
   // 2. בדיקה אם הסרט במועדפים (כדי לשנות את הכפתור)
-  const isFavorite = favorites.some((fav) => fav.id === movieDetails?.id);
+  const isFavorite = useSelector((state) =>
+    selectIsFavorite(state, Number(id)),
+  );
+
+  useKeyboardNavigation();
 
   useEffect(() => {
+    dispatch(setFocusArea("MOVIE_DETAILS"));
+    dispatch(setFocusIndex(0));
+
     if (id) {
       dispatch(fetchMovieDetailsRequest({ id }));
     }
   }, [id, dispatch]);
 
+ 
+
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === "Escape") {
-        navigate(-1);
-      }
+      if (e.key === "Escape") navigate(-1);
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [navigate]);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
-  if (error) return <div className={styles.error}>Error: {error}</div>;
   if (!movieDetails) return null;
 
   // 3. בניית נתיבי תמונה (רזולוציה גבוהה לרקע, בינונית לפוסטר)
@@ -43,22 +57,20 @@ const MovieDetails = () => {
 
   // 4. חילוץ שנה מהתאריך
   const releaseYear = movieDetails.release_date?.split("-")[0];
-
+  const isAreaActive = focusArea === "MOVIE_DETAILS";
   return (
     <div className={styles.page}>
-      
       {/* === רקע אחורי דרמטי === */}
       {movieDetails.backdrop_path && (
-        <div 
-          className={styles.backdrop} 
-          style={{ backgroundImage: `url(${backdropUrl})` }} 
+        <div
+          className={styles.backdrop}
+          style={{ backgroundImage: `url(${backdropUrl})` }}
         />
       )}
       <div className={styles.overlay} />
 
       {/* === תוכן === */}
       <div className={styles.contentContainer}>
-        
         {/* פוסטר שמאלי */}
         <img
           src={posterUrl}
@@ -69,19 +81,20 @@ const MovieDetails = () => {
         {/* מידע ימני */}
         <div className={styles.info}>
           <h1 className={styles.title}>{movieDetails.title}</h1>
-          
+
           <div className={styles.metaData}>
             <span>{releaseYear}</span>
             {/* אם יש דירוג מה-API */}
             {movieDetails.vote_average && (
-               <span className={styles.tag}>
-                 ⭐ {movieDetails.vote_average.toFixed(1)}
-               </span>
+              <span className={styles.tag}>
+                ⭐ {movieDetails.vote_average.toFixed(1)}
+              </span>
             )}
-             {/* המרת דקות לשעות ודקות */}
+            {/* המרת דקות לשעות ודקות */}
             {movieDetails.runtime && (
               <span>
-                {Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m
+                {Math.floor(movieDetails.runtime / 60)}h{" "}
+                {movieDetails.runtime % 60}m
               </span>
             )}
           </div>
@@ -90,16 +103,23 @@ const MovieDetails = () => {
 
           <div className={styles.actions}>
             {/* כפתור מועדפים ראשי */}
-            <button 
-              className={`${styles.btn} ${styles.primaryBtn}`}
+            <button
+              className={`${styles.btn} ${styles.primaryBtn} ${
+                isAreaActive && focusIndex === 0 ? styles.focused : ""
+              }`}
+              // מאפשרים גם לחיצה עם העכבר שתסנכרן את ה-Redux
+              onMouseEnter={() => dispatch(setFocusIndex(0))}
               onClick={() => dispatch(toggleFavorite(movieDetails))}
             >
-              {isFavorite ? "💔 Remove from Favorites" : "❤️ Add to Favorites"}
+              {isFavorite ? "💔 Remove" : "❤️ Add to Favorites"}
             </button>
 
-            {/* כפתור חזרה */}
-            <button 
-              className={`${styles.btn} ${styles.secondaryBtn}`}
+            {/* כפתור חזרה (Index 1) */}
+            <button
+              className={`${styles.btn} ${styles.secondaryBtn} ${
+                isAreaActive && focusIndex === 1 ? styles.focused : ""
+              }`}
+              onMouseEnter={() => dispatch(setFocusIndex(1))}
               onClick={() => navigate(-1)}
             >
               ⬅ Back

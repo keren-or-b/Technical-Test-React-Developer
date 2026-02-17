@@ -6,7 +6,8 @@ const initialState = {
   movies: [],
   gridColumns: 4,
   movieDetails: null,
-  favorites: localStorageUtils.getFavorites(),
+
+  favoriteIds: localStorageUtils.getFavoritesIds(),
   loading: false,
   error: null,
   totalPages: 1,
@@ -78,7 +79,7 @@ const movieSlice = createSlice({
         state.movies = []; // אופציונלי: ניקוי סרטים קודמים כדי למנוע בלבול עד שהתוצאות יגיעו
       }
     },
-    
+
     /**
      * שינוי אזור הפוקוס
      */
@@ -110,16 +111,27 @@ const movieSlice = createSlice({
 
     // ניהול favorites ב-localStorage
     toggleFavorite: (state, action) => {
-      const movie = action.payload;
-      const exists = state.favorites.some((f) => f.id === movie.id);
-      if (exists) {
-        state.favorites = state.favorites.filter((f) => f.id !== movie.id);
+      const movieId = action.payload.id;
+      const index = state.favoriteIds.indexOf(movieId);
+
+      if (index >= 0) {
+        // === הסרה ===
+        state.favoriteIds.splice(index, 1);
+
+        // עדכון מיידי של התצוגה אם אנחנו במסך המועדפים
+        if (state.view === "favorites") {
+          // מסננים את הסרט שנמחק מרשימת הסרטים המוצגים
+          state.movies = state.movies.filter((m) => m.id !== movieId);
+        }
       } else {
-        state.favorites.push(movie);
+        // === הוספה ===
+        // אופציונלי: אם את רוצה שהחדשים יהיו ראשונים, תשתמשי ב-unshift
+        // state.favoriteIds.unshift(movieId);
+        state.favoriteIds.push(movieId);
       }
-      localStorageUtils.saveFavorites(state.favorites);
+
+      localStorageUtils.saveFavoritesIds(state.favoriteIds);
     },
-   
   },
   // ==========================================
   // clearError: (state) => {
@@ -166,25 +178,12 @@ export const selectFocusIndex = (state) => state.movies.focusIndex;
 export const selectGridColumns = (state) => state.movies.gridColumns;
 
 // Computed selectors
-// redux/movies/movieSlice.js
+// ✅ התיקון: תמיד מחזירים את המערך הראשי
+export const selectCurrentMovies = (state) => state.movies.movies;
 
-// ... שאר הסלקטורים למעלה ...
-
-// === תיקון: החזרת הלוגיקה החכמה ===
-
-export const selectCurrentMovies = (state) => {
-  const { view, movies, favorites, page } = state.movies;
-
-  // במועדפים: אנחנו מבצעים פג'ינציה ידנית (Client Side)
-  if (view === "favorites") {
-    const ITEMS_PER_PAGE = 20;
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return favorites.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }
-
-  // ברגיל: השרת כבר נותן לנו 20 תוצאות
-  return movies;
-};
+// ✅ selectIsFavorite נשאר מצוין כמו שהוא (כי הוא בודק IDs)
+export const selectIsFavorite = (state, movieId) =>
+  state.movies.favoriteIds.includes(movieId);
 
 export const selectTotalPages = (state) => {
   const { view, totalPages, favorites } = state.movies;

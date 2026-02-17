@@ -1,25 +1,20 @@
 // utils/localStorage.js
-// const FAVORITES_KEY = 'movieFavorites';
-const FAVORITES_KEY = 'favorites';
 
 export const localStorageUtils = {
-  // קריאה מהזיכרון (רק בטעינת האפליקציה)
-  getFavorites: () => {
+  getFavoritesIds: () => {
     try {
-      const favorites = localStorage.getItem(FAVORITES_KEY);
-      return favorites ? JSON.parse(favorites) : [];
-    } catch (error) {
-      console.error('Error reading favorites:', error);
+      const stored = localStorage.getItem("favorite_ids");
+      const parsed = stored ? JSON.parse(stored) : [];
+      // וידוא שאנחנו מחזירים רק מספרים
+      return Array.isArray(parsed)
+        ? parsed.filter((id) => typeof id === "number")
+        : [];
+    } catch (e) {
       return [];
     }
   },
 
-  // שמירה לזיכרון (בכל פעם שה-Redux משתנה)
-  saveFavorites: (favorites) => {
-    try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-    } catch (error) {
-      console.error('Error saving favorites:', error);
-    }
-  }
+  saveFavoritesIds: (ids) => {
+    localStorage.setItem("favorite_ids", JSON.stringify(ids));
+  },
 };

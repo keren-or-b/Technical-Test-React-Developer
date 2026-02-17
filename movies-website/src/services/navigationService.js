@@ -8,6 +8,7 @@ export const FOCUS_AREAS = {
   NAV_BAR: "NAV_BAR",
   MOVIE_GRID: "MOVIE_GRID",
   PAGINATION: "PAGINATION",
+  MOVIE_DETAILS: "MOVIE_DETAILS", // <--- האזור החדש
 };
 
 /**
@@ -257,10 +258,20 @@ export const calculateNavigation = ({
         ) {
           return { type: "NO_CHANGE" };
         }
+        let targetIndex = 0;
+
+        // אם אנחנו עולים ל-NAV_BAR, נחשב את האינדקס של הטאב הנוכחי
+        if (gridMove.newArea === FOCUS_AREAS.NAV_BAR) {
+          targetIndex = getIndexByView(currentView);
+        }
+
+        if (gridMove.newArea === FOCUS_AREAS.PAGINATION) {
+          targetIndex = 1; // 0 = Prev, 1 = Next
+        }
         return {
           type: "CHANGE_AREA",
           newArea: gridMove.newArea,
-          newIndex: 0,
+          newIndex: targetIndex,
         };
       }
 
@@ -291,6 +302,16 @@ export const calculateNavigation = ({
         };
       }
 
+      return { type: "NO_CHANGE" };
+    }
+    case FOCUS_AREAS.MOVIE_DETAILS: {
+      // 0 = כפתור מועדפים, 1 = כפתור חזרה
+      if (direction === DIRECTIONS.RIGHT) {
+        return { type: "UPDATE_INDEX", newIndex: 1 };
+      }
+      if (direction === DIRECTIONS.LEFT) {
+        return { type: "UPDATE_INDEX", newIndex: 0 };
+      }
       return { type: "NO_CHANGE" };
     }
 
@@ -347,6 +368,16 @@ export const getEnterAction = ({
       return { type: "NO_ACTION" };
     }
 
+    case FOCUS_AREAS.MOVIE_DETAILS: {
+      if (currentIndex === 0) {
+        return { type: "TOGGLE_FAVORITE_DETAILS" }; // הוספה למועדפים
+      }
+      if (currentIndex === 1) {
+        return { type: "GO_BACK" }; // חזרה אחורה
+      }
+      return { type: "NO_ACTION" };
+    }
+
     default:
       return { type: "NO_ACTION" };
   }
@@ -359,12 +390,12 @@ export const getEnterAction = ({
 /**
  * מה לעשות כש-Escape נלחץ
  */
-export const getEscapeAction = ({ currentArea }) => {
-  // תמיד חוזר ל-MOVIE_GRID
-  if (currentArea !== FOCUS_AREAS.MOVIE_GRID) {
-    return {
-      type: "RESET_TO_GRID",
-    };
-  }
-  return { type: "NO_ACTION" };
-};
+// export const getEscapeAction = ({ currentArea }) => {
+//   // תמיד חוזר ל-MOVIE_GRID
+//   if (currentArea !== FOCUS_AREAS.MOVIE_GRID) {
+//     return {
+//       type: "RESET_TO_GRID",
+//     };
+//   }
+//   return { type: "NO_ACTION" };
+// };

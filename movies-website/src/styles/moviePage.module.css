@@ -136,6 +136,18 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* MoviePage.module.css */
+
+/* ... הסגנונות הקיימים ... */
+
+/* סגנון לכפתור שנמצא בפוקוס */
+.focused {
+  transform: scale(1.05); /* הגדלה קלה */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* הילה זוהרת */
+  border: 2px solid #ffffff; /* מסגרת לבנה בולטת */
+  outline: none;
+}
+
 /* התאמה למובייל */
 @media (max-width: 768px) {
   .contentContainer {

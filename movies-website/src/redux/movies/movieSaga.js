@@ -22,32 +22,65 @@ import {
   appStarted,
 } from "./movieSlice";
 
-// --- Rate Limit Logic (נשאר אותו דבר) ---
-let searchTimestamps = [];
-const checkSearchRateLimit = () => {
-  const now = Date.now();
-  searchTimestamps = searchTimestamps.filter((ts) => now - ts < 10000);
-  if (searchTimestamps.length >= 5) return false;
-  searchTimestamps.push(now);
-  return true;
-};
+// ==========================================
+// ✅ 1. פונקציית העזר (Safe Wrapper) - כאן!
+// ==========================================
+function* fetchMovieSafe(id) {
+  try {
+    // מנסים להביא את הסרט
+    const movie = yield call(moviesAPI.getMovieDetails, id);
+    return movie;
+  } catch (error) {
+    // במקרה של שגיאה (למשל 404), לא זורקים Error אלא מחזירים null
+    // זה מונע מכל ה-Promise.all להיכשל
+    console.warn(`Skipping movie ID ${id}:`, error.message);
+    return null;
+  }
+}
 
 // --- Fetch Movies Saga ---
 function* fetchMoviesSaga() {
   try {
     const state = yield select((state) => state.movies);
-    const { view, page, searchTerm } = state;
+    const { view, page, searchTerm, favoriteIds } = state;
+    // בתוך fetchMoviesSaga, בחלק של favorites:
 
+    if (view === "favorites") {
+      const top20Ids = favoriteIds.slice(0, 20);
+
+      if (top20Ids.length === 0) {
+        yield put(fetchMoviesSuccess({ results: [], total_pages: 0 }));
+        return;
+      }
+
+      // ✅ שינוי: קוראים ל-fetchMovieSafe במקום ל-api ישירות
+      const calls = top20Ids.map((id) => call(fetchMovieSafe, id));
+
+      // עכשיו זה לא ייכשל גם אם סרט אחד חסר
+      const moviesResults = yield all(calls);
+
+      // ✅ סינון: מעיפים את ה-null (הסרטים שנכשלו)
+      const validMovies = moviesResults.filter((movie) => movie !== null);
+
+      yield put(
+        fetchMoviesSuccess({
+          results: validMovies,
+          total_pages: 1,
+        }),
+      );
+
+      return;
+    }
     // ניקוי רווחים
     const cleanTerm = searchTerm ? searchTerm.trim() : "";
     let response;
 
     // תרחיש 1: חיפוש פעיל
     if (cleanTerm.length >= 2) {
-      if (!checkSearchRateLimit()) {
-        yield put(fetchMoviesFailure("יותר מדי בקשות. נא להמתין."));
-        return;
-      }
+      // if (!checkSearchRateLimit()) {
+      //   yield put(fetchMoviesFailure("יותר מדי בקשות. נא להמתין."));
+      //   return;
+      // }
       response = yield call(moviesAPI.searchMovies, cleanTerm, page);
     }
     // תרחיש 2: אות אחת (לא עושים כלום או מנקים)
