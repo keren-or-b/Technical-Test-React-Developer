@@ -70,6 +70,7 @@ function* fetchMoviesSaga() {
 
     // --- Cache hit: return stored results without calling the API ---
     if (cleanTerm.length < 2 && cache[view] && cache[view][page]) {
+      console.log(`Cache HIT for ${view} page ${page}`);
       response = cache[view][page];
       yield put(fetchMoviesSuccess(response));
       return;
@@ -78,6 +79,7 @@ function* fetchMoviesSaga() {
     // --- Search: query the API with rate limit protection ---
     if (cleanTerm.length >= 2) {
       if (!searchRateLimiter.isAllowed()) {
+        console.warn("Rate limit exceeded");
         yield put(
           fetchMoviesFailure(
             "You are searching too fast. Please wait a moment.",
