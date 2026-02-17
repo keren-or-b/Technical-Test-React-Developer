@@ -30,7 +30,6 @@ export const useKeyboardNavigation = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Selectors
   const movies = useSelector(selectCurrentMovies);
   const focusArea = useSelector(selectFocusArea);
   const focusIndex = useSelector(selectFocusIndex);
@@ -42,9 +41,7 @@ export const useKeyboardNavigation = () => {
   const movieDetails = useSelector(selectMovieDetails);
   const isPaginationVisible = currentView !== "favorites" && totalPages > 1;
 
-  // ============================================
-  // ARROW KEY HANDLER
-  // ============================================
+  // Translate arrow key to a direction and delegate to the navigation service
   const handleArrowKey = useCallback(
     (key) => {
       const directionMap = {
@@ -70,7 +67,6 @@ export const useKeyboardNavigation = () => {
       switch (navigationResult.type) {
         case "CHANGE_AREA":
           dispatch(setFocusArea(navigationResult.newArea));
-
           if (navigationResult.newIndex !== undefined) {
             dispatch(setFocusIndex(navigationResult.newIndex));
           }
@@ -81,8 +77,6 @@ export const useKeyboardNavigation = () => {
           break;
 
         case "NO_CHANGE":
-          break;
-
         default:
           break;
       }
@@ -99,9 +93,7 @@ export const useKeyboardNavigation = () => {
     ],
   );
 
-  // ============================================
-  // ENTER HANDLER
-  // ============================================
+  // Resolve and execute the correct action for the currently focused element
   const handleEnter = useCallback(() => {
     const enterAction = getEnterAction({
       currentArea: focusArea,
@@ -122,20 +114,15 @@ export const useKeyboardNavigation = () => {
         break;
 
       case "PREVIOUS_PAGE":
-        if (page > 1) {
-          dispatch(setPage(page - 1));
-        }
+        if (page > 1) dispatch(setPage(page - 1));
         break;
 
       case "NEXT_PAGE":
-        if (page < totalPages) {
-          dispatch(setPage(page + 1));
-        }
+        if (page < totalPages) dispatch(setPage(page + 1));
         break;
+
       case "TOGGLE_FAVORITE_DETAILS":
-        if (movieDetails) {
-          dispatch(toggleFavorite(movieDetails));
-        }
+        if (movieDetails) dispatch(toggleFavorite(movieDetails));
         break;
 
       case "GO_BACK":
@@ -157,27 +144,22 @@ export const useKeyboardNavigation = () => {
     movieDetails,
   ]);
 
-  // ============================================
-  // MAIN KEYBOARD HANDLER
-  // ============================================
-
   const handleKeyDown = useCallback(
     (event) => {
       const key = event.key;
 
-      // מניעת Tab
+      // Prevent default Tab behavior throughout the app
       if (key === "Tab") {
         event.preventDefault();
         return;
       }
 
-      // ============================================
-      // ESCAPE - חזרה לגריד
-      // ============================================
+      // Escape — context-aware back/reset behavior
       if (key === "Escape") {
         event.preventDefault();
 
         if (focusArea === "PAGINATION") {
+          // Return to the last item in the grid
           dispatch(setFocusArea("MOVIE_GRID"));
           const lastIndex = movies.length > 0 ? movies.length - 1 : 0;
           dispatch(setFocusIndex(lastIndex));
@@ -186,14 +168,17 @@ export const useKeyboardNavigation = () => {
 
         if (focusArea === "MOVIE_GRID") {
           if (focusIndex > 0) {
+            // Jump to the first item
             dispatch(setFocusIndex(0));
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
+            // Already at first item — move up to the nav bar
             dispatch(setFocusArea("NAV_BAR"));
             dispatch(setFocusIndex(getIndexByView(currentView)));
           }
           return;
         }
+
         if (focusArea === "MOVIE_DETAILS") {
           navigate(-1);
           return;
@@ -202,18 +187,14 @@ export const useKeyboardNavigation = () => {
         return;
       }
 
-      // ============================================
-      // ARROW KEYS - ניווט
-      // ============================================
+      // Arrow keys — delegate to handleArrowKey
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
         event.preventDefault();
         handleArrowKey(key);
         return;
       }
 
-      // ============================================
-      // ENTER - בחירה
-      // ============================================
+      // Enter — delegate to handleEnter
       if (key === "Enter") {
         event.preventDefault();
         handleEnter();
@@ -238,14 +219,9 @@ export const useKeyboardNavigation = () => {
     ],
   );
 
-  // ============================================
-  // ATTACH EVENT LISTENER
-  // ============================================
+  // Register and clean up the global keyboard listener
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 };

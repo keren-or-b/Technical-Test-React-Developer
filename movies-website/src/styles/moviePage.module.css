@@ -1,44 +1,51 @@
-/* MoviePage.module.css */
-
 .page {
   position: relative;
   min-height: 100vh;
-  background-color: #141414; /* רקע כהה */
+  background-color: #141414;
   color: #fff;
   overflow-x: hidden;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* תמונת הרקע הענקית */
 .backdrop {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 70vh; /* תופס 70% מהגובה */
+  height: 70vh;
   background-size: cover;
   background-position: center top;
   z-index: 0;
-  /* אפקט עמעום כדי שהטקסט יהיה קריא */
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
-/* שכבת ההכהיה מעל תמונת הרקע */
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 70vh;
-  background: linear-gradient(to right, #141414 10%, rgba(20, 20, 20, 0.6) 50%, rgba(20, 20, 20, 0) 100%);
+  background: linear-gradient(
+    to right,
+    #141414 10%,
+    rgba(20, 20, 20, 0.6) 50%,
+    rgba(20, 20, 20, 0) 100%
+  );
   z-index: 1;
 }
 
-/* הקונטיינר הראשי של התוכן */
 .contentContainer {
   position: relative;
-  z-index: 2; /* מעל הרקע */
+  z-index: 2;
   max-width: 1200px;
   margin: 0 auto;
   padding: 100px 20px 40px;
@@ -47,7 +54,6 @@
   align-items: flex-start;
 }
 
-/* הפוסטר */
 .poster {
   width: 300px;
   border-radius: 12px;
@@ -60,7 +66,6 @@
   transform: scale(1.02);
 }
 
-/* אזור הטקסט */
 .info {
   margin-top: 20px;
   max-width: 700px;
@@ -71,7 +76,7 @@
   font-weight: 800;
   margin-bottom: 10px;
   line-height: 1.1;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .metaData {
@@ -103,7 +108,6 @@
   gap: 15px;
 }
 
-/* כפתורים מעוצבים */
 .btn {
   padding: 12px 24px;
   font-size: 1.1rem;
@@ -118,7 +122,7 @@
 }
 
 .primaryBtn {
-  background-color: #e50914; /* אדום נטפליקס */
+  background-color: #e50914;
   color: white;
 }
 
@@ -136,19 +140,13 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-/* MoviePage.module.css */
-
-/* ... הסגנונות הקיימים ... */
-
-/* סגנון לכפתור שנמצא בפוקוס */
 .focused {
-  transform: scale(1.05); /* הגדלה קלה */
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* הילה זוהרת */
-  border: 2px solid #ffffff; /* מסגרת לבנה בולטת */
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+  border: 2px solid #ffffff;
   outline: none;
 }
 
-/* התאמה למובייל */
 @media (max-width: 768px) {
   .contentContainer {
     flex-direction: column;
@@ -165,10 +163,10 @@
     height: 40vh;
     background: linear-gradient(to top, #141414 10%, rgba(20, 20, 20, 0) 100%);
   }
-  
+
   .poster {
     width: 200px;
-    margin-top: 100px; /* דוחף למטה כדי שלא יוסתר ע"י הרקע */
+    margin-top: 100px;
   }
 
   .title {
@@ -178,11 +176,11 @@
   .metaData {
     justify-content: center;
   }
-  
+
   .overview {
     margin: 0 auto 30px;
   }
-  
+
   .actions {
     justify-content: center;
   }

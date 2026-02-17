@@ -38,36 +38,34 @@ const MoviesPage = () => {
 
   useKeyboardNavigation();
 
-  // Initial Load
+  // Trigger the initial data fetch on mount
   useEffect(() => {
     dispatch(appStarted());
   }, [dispatch]);
 
+  // Scroll the relevant element into view when focus area changes
   useEffect(() => {
     if (focusArea === "NAV_BAR") {
-      navBarRef.current?.scrollIntoView({
-        block: "center",
-      });
+      navBarRef.current?.scrollIntoView({ block: "center" });
     }
     if (focusArea === "PAGINATION") {
       const paginationElement = document.querySelector(
         `.${styles.paginationWrapper}`,
       );
       if (paginationElement) {
-        paginationElement.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
+        paginationElement.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     }
   }, [focusArea]);
 
+  // When returning from the movie details page, reset focus back to the grid
   useEffect(() => {
     if (focusArea === "MOVIE_DETAILS") {
       dispatch(setFocusArea("MOVIE_GRID"));
     }
   }, [focusArea, dispatch]);
 
+  // Auto-select the focused nav tab after 2 seconds of hover inactivity
   useEffect(() => {
     let timer;
     if (focusArea === "NAV_BAR") {
@@ -80,6 +78,8 @@ const MoviesPage = () => {
     }
     return () => clearTimeout(timer);
   }, [focusArea, focusIndex, currentView, dispatch]);
+
+  // --- Event Handlers ---
 
   const handleNavHover = useCallback(
     (index) => {
@@ -122,6 +122,7 @@ const MoviesPage = () => {
 
   return (
     <div className={styles.container}>
+      {/* Header: search input + category nav bar */}
       <div className={styles.headerWrapper}>
         <div className={styles.searchWrapper}>
           <SearchInput />
@@ -130,7 +131,6 @@ const MoviesPage = () => {
         <div className={styles.menuBar} ref={navBarRef}>
           {VIEW_CATEGORIES.map((viewName, index) => {
             const label = viewName.replace("_", " ").toUpperCase();
-
             const isSelected = currentView === viewName;
             const isFocused = focusArea === "NAV_BAR" && focusIndex === index;
 
@@ -152,20 +152,16 @@ const MoviesPage = () => {
         </div>
       </div>
 
-      {/* === MAIN CONTENT === */}
       {loading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
         </div>
       ) : (
         <>
-          {/* === MOVIE GRID === */}
-
+          {/* Movie grid */}
           <div
             className={styles.movieGrid}
-            style={{
-              gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
-            }}
+            style={{ gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}
           >
             {movies.length > 0 ? (
               movies.map((movie, index) => (
@@ -183,7 +179,7 @@ const MoviesPage = () => {
             )}
           </div>
 
-          {/* === PAGINATION === */}
+          {/* Pagination — hidden on favorites view */}
           {currentView !== "favorites" && movies.length > 0 && (
             <div className={styles.paginationWrapper}>
               <button

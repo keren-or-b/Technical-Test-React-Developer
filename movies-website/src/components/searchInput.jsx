@@ -19,6 +19,7 @@ const SearchInput = () => {
   const searchTerm = useSelector(selectSearchTerm);
   const currentView = useSelector(selectCurrentView);
 
+  // Sync DOM focus with Redux focus state
   useEffect(() => {
     if (focusArea === "SEARCH") {
       inputRef.current?.focus();
@@ -26,12 +27,12 @@ const SearchInput = () => {
       inputRef.current?.blur();
     }
   }, [focusArea]);
+
+  // Escape clears the search and moves focus to the nav bar
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
       e.preventDefault();
-
       inputRef.current?.blur();
-
       dispatch(setSearchTerm(""));
       dispatch(setFocusArea("NAV_BAR"));
       dispatch(setFocusIndex(getIndexByView(currentView)));
@@ -42,7 +43,6 @@ const SearchInput = () => {
     dispatch(setSearchTerm(e.target.value));
   };
 
-  // בדיקה האם האינפוט בפוקוס כרגע (לצורך עיצוב)
   const isFocused = focusArea === "SEARCH";
 
   return (

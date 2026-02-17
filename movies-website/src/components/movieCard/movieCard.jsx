@@ -1,25 +1,22 @@
+import { memo, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { selectGridColumns } from "../../redux/movies/movieSlice";
 import styles from "./movieCard.module.css";
-import { memo, useEffect, useRef } from "react";
 
 const PLACEHOLDER_IMAGE = "/placeholder-movie.svg";
 const POSTER_PATH = "https://image.tmdb.org/t/p/w500";
 
 const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
   const cardRef = useRef(null);
-
   const gridColumns = useSelector(selectGridColumns);
 
+  // Scroll the active card into view — first row scrolls to top, others use scrollIntoView
   useEffect(() => {
     if (isActive && cardRef.current) {
       const isFirstRow = index < gridColumns;
 
       if (isFirstRow) {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         cardRef.current.scrollIntoView({
           behavior: "smooth",
@@ -30,6 +27,7 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
     }
   }, [isActive, index]);
 
+  // Only trigger hover if the card isn't already active, to avoid redundant dispatches
   const handleMouseMove = () => {
     if (!isActive) {
       onHover(index);
@@ -51,6 +49,7 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
         }
         alt={movie.title}
         loading="lazy"
+        // Fall back to placeholder if the image URL is broken
         onError={(e) => {
           if (e.target.src !== PLACEHOLDER_IMAGE) {
             e.target.src = PLACEHOLDER_IMAGE;

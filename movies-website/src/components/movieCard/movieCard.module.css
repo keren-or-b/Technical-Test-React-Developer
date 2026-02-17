@@ -1,5 +1,3 @@
-/* movieCard.module.css */
-
 .card {
   position: relative;
   background-color: #1a1a1a;
@@ -8,16 +6,13 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* חשוב לניווט שלך: */
   scroll-margin-top: 180px;
   scroll-margin-bottom: 50px;
-  /* יחס גובה-רוחב של פוסטר קולנועי סטנדרטי */
   aspect-ratio: 4 / 5;
   display: flex;
   flex-direction: column;
 }
 
-/* תמונת הפוסטר */
 .card img {
   width: 100%;
   height: 100%;
@@ -25,7 +20,6 @@
   transition: transform 0.5s ease;
 }
 
-/* הכותרת - מופיעה כ-Overlay על התמונה */
 .card h2 {
   position: absolute;
   bottom: 0;
@@ -38,30 +32,28 @@
   color: white;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
   text-align: center;
-  opacity: 0; /* מוסתר כברירת מחדל */
+  opacity: 0;
   transition: opacity 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* === מצב Active (פוקוס מקלדת או Hover) === */
 .active {
   transform: scale(1.05);
   z-index: 10;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-  border: 3px solid #e50914; /* מסגרת אדומה בסגנון נטפליקס */
+  border: 3px solid #e50914;
 }
 
 .active img {
-  transform: scale(1.1); /* זום קטן לתמונה */
+  transform: scale(1.1);
 }
 
 .active h2 {
-  opacity: 1; /* הכותרת נחשפת בבחירה */
+  opacity: 1;
 }
 
-/* במצב שלא בחור, נרצה עמעום קל כדי שהנבחר יבלוט */
 :not(.active).card {
   opacity: 0.7;
 }

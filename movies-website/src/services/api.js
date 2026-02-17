@@ -12,31 +12,31 @@ const apiClient = axios.create({
   },
 });
 
-// === Interceptor: טיפול מרכזי בשגיאות ===
+// Centralized response error handler — catches network errors and known HTTP status codes
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // שגיאת רשת או timeout
+    // Network error or request timeout
     if (!error.response || error.code === "ECONNABORTED") {
       return Promise.reject(
-        new Error("שגיאת תקשורת - נא לבדוק את החיבור לאינטרנט"),
+        new Error("Connection error — please check your internet connection"),
       );
     }
 
     const { status } = error.response;
 
-    // טיפול בשגיאות נפוצות
     switch (status) {
       case 401:
-        return Promise.reject(new Error("מפתח API לא תקין"));
+        return Promise.reject(new Error("Invalid API key"));
       case 404:
-        return Promise.reject(new Error("התוכן לא נמצא"));
+        return Promise.reject(new Error("Content not found"));
       default:
-        return Promise.reject(new Error("אירעה שגיאה כללית בשרת"));
+        return Promise.reject(new Error("An unexpected server error occurred"));
     }
   },
 );
 
+// --- API Methods ---
 export const moviesAPI = {
   getPopularMovies: async (page = 1) => {
     const response = await apiClient.get("/movie/popular", {
@@ -52,6 +52,7 @@ export const moviesAPI = {
     return response.data;
   },
 
+  // Guard against short queries before hitting the API
   searchMovies: async (query, page = 1) => {
     if (!query || query.length < 2) {
       return { results: [], total_pages: 0 };
@@ -62,6 +63,7 @@ export const moviesAPI = {
     });
     return response.data;
   },
+
   getMovieDetails: async (movieId) => {
     const response = await apiClient.get(`/movie/${movieId}`);
     return response.data;

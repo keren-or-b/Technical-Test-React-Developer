@@ -2,11 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import { localStorageUtils } from "../../utils/localStorage";
 import { DEFAULT_GRID_COLUMNS } from "../../utils/constants";
 
+const FAVORITES_PAGE_SIZE = 20;
+
 const initialState = {
   movies: [],
   gridColumns: DEFAULT_GRID_COLUMNS,
   movieDetails: null,
-
   favoriteIds: localStorageUtils.getFavoritesIds(),
   loading: false,
   error: null,
@@ -26,10 +27,8 @@ const movieSlice = createSlice({
   name: "movies",
   initialState,
   reducers: {
-    appStarted: (state) => {
-      // הפעולה הזו לא צריכה לעשות כלום ב-State,
-      // היא רק "סיגנל" עבור הסאגה.
-    },
+    // Signal-only action — no state change, used to trigger the root saga on app mount
+    appStarted: (state) => {},
 
     fetchMoviesRequest: (state) => {
       state.loading = true;
@@ -43,8 +42,8 @@ const movieSlice = createSlice({
       state.totalPages = total_pages;
       state.loading = false;
 
+      // Cache results only for browse views (not search or favorites)
       const isSearch = state.searchTerm.length >= 2;
-
       if (!isSearch && state.view !== "favorites") {
         const view = state.view;
         const page = state.page;
@@ -58,6 +57,7 @@ const movieSlice = createSlice({
         };
       }
     },
+
     fetchMoviesFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
@@ -67,20 +67,26 @@ const movieSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
+
     fetchMovieDetailsSuccess: (state, action) => {
       state.loading = false;
       state.movieDetails = action.payload;
     },
+
     fetchMovieDetailsFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
+
+    // Reset to page 1 when switching views to avoid out-of-range pages
     setView: (state, action) => {
       if (state.view !== action.payload) {
         state.view = action.payload;
         state.page = 1;
       }
     },
+
+    // Guard against navigating outside valid page range
     setPage: (state, action) => {
       const newPage = action.payload;
       if (newPage >= 1 && newPage <= state.totalPages) {
@@ -92,6 +98,8 @@ const movieSlice = createSlice({
       state.searchTerm = action.payload;
       state.page = 1;
 
+      // If the user starts searching while on favorites, switch to popular
+      // so API results are visible
       if (state.searchTerm.length > 0 && state.view === "favorites") {
         state.view = "popular";
         state.movies = [];
@@ -111,12 +119,15 @@ const movieSlice = createSlice({
       const index = state.favoriteIds.indexOf(movieId);
 
       if (index >= 0) {
+        // Remove from favorites
         state.favoriteIds.splice(index, 1);
 
+        // Also remove from visible list if currently on the favorites view
         if (state.view === "favorites") {
           state.movies = state.movies.filter((m) => m.id !== movieId);
         }
       } else {
+        // Add to favorites
         state.favoriteIds.push(movieId);
       }
 
@@ -124,6 +135,7 @@ const movieSlice = createSlice({
     },
   },
 });
+
 export const {
   appStarted,
   fetchMoviesRequest,
@@ -140,6 +152,7 @@ export const {
   toggleFavorite,
 } = movieSlice.actions;
 
+// --- Selectors ---
 export const selectCurrentMovies = (state) => state.movies.movies;
 export const selectFavorites = (state) => state.movies.favoriteIds;
 export const selectMovieDetails = (state) => state.movies.movieDetails;
@@ -155,12 +168,13 @@ export const selectGridColumns = (state) => state.movies.gridColumns;
 export const selectIsFavorite = (state, movieId) =>
   state.movies.favoriteIds.includes(movieId);
 
+// For favorites view, calculate pages based on total saved IDs
 export const selectTotalPages = (state) => {
   const { view, totalPages, favoriteIds } = state.movies;
 
   if (view === "favorites") {
     if (!favoriteIds || favoriteIds.length === 0) return 1;
-    return Math.ceil(favoriteIds.length / 20);
+    return Math.ceil(favoriteIds.length / FAVORITES_PAGE_SIZE);
   }
 
   return totalPages;
@@ -170,6 +184,5 @@ export const selectHasMovies = (state) => {
   const currentMovies = selectCurrentMovies(state);
   return currentMovies.length > 0;
 };
-
 
 export default movieSlice.reducer;
