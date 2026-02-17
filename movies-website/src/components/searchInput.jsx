@@ -7,10 +7,12 @@ import {
   selectSearchTerm,
   setFocusArea,
   setFocusIndex,
+  selectCurrentView,
 } from "../redux/movies/movieSlice";
 
 // ייבוא העיצוב החדש
 import styles from "./searchInput.module.css";
+import { getIndexByView } from "../services/navigationService";
 
 const SearchInput = () => {
   const inputRef = useRef(null);
@@ -18,6 +20,7 @@ const SearchInput = () => {
 
   const focusArea = useSelector(selectFocusArea);
   const searchTerm = useSelector(selectSearchTerm);
+  const currentView = useSelector(selectCurrentView);
 
   // סנכרון פוקוס
   useEffect(() => {
