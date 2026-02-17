@@ -8,7 +8,7 @@ import movieReducer from "./movies/movieSlice";
 import moviesSaga from "./movies/movieSaga";
 
 // ✅ 1. ייבוא ה-Middleware החדש
-import { rateLimitMiddleware } from "../middleware/rateLimitMiddleware";
+// import { rateLimitMiddleware } from "../middleware/rateLimitMiddleware";
 
 // יצירת ה-Saga Middleware
 const sagaMiddleware = createSagaMiddleware();
@@ -21,7 +21,7 @@ export const store = configureStore({
   // ✅ 2. הוספה לשרשרת ה-Middlewares
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false }) // אם את משתמשת רק בסאגה, אפשר לכבות את thunk
-      .concat(rateLimitMiddleware) // <--- הנה הוא! שימי אותו לפני הסאגה
+      // .concat(rateLimitMiddleware) // <--- הנה הוא! שימי אותו לפני הסאגה
       .concat(sagaMiddleware),
 });
 

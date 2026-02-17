@@ -7,6 +7,7 @@ import {
   all, // הוספתי את all לסידור נקי בסוף
 } from "redux-saga/effects";
 import { moviesAPI } from "../../services/api";
+import { searchRateLimiter } from "../../utils/rateLimiter"; // ✅ ייבוא ה-Class שלך
 
 // 1. ייבוא רק של הפעולות שבאמת קיימות ב-Slice החדש
 import {
@@ -41,7 +42,7 @@ function* fetchMovieSafe(id) {
 function* fetchMoviesSaga() {
   try {
     const state = yield select((state) => state.movies);
-    const { view, page, searchTerm, favoriteIds } = state;
+    const { view, page, searchTerm, cache } = state; // ✅ שלפנו את ה-cache
     // בתוך fetchMoviesSaga, בחלק של favorites:
 
     if (view === "favorites") {
@@ -74,12 +75,34 @@ function* fetchMoviesSaga() {
     const cleanTerm = searchTerm ? searchTerm.trim() : "";
     let response;
 
+    if (cleanTerm.length < 2 && cache[view] && cache[view][page]) {
+      console.log(`🚀 Cache HIT for ${view} page ${page}`); // לוג לבדיקה
+
+      // משתמשים בנתונים מהזיכרון!
+      response = cache[view][page];
+
+      // שולחים ישר ל-Success ומסיימים
+      yield put(fetchMoviesSuccess(response));
+      return;
+    }
+
+    console.log(`📡 Cache MISS - Fetching from API...`);
+
     // תרחיש 1: חיפוש פעיל
     if (cleanTerm.length >= 2) {
       // if (!checkSearchRateLimit()) {
       //   yield put(fetchMoviesFailure("יותר מדי בקשות. נא להמתין."));
       //   return;
       // }
+      if (!searchRateLimiter.isAllowed()) {
+        console.warn("Rate limit exceeded via Saga");
+        yield put(
+          fetchMoviesFailure(
+            "You are searching too fast. Please wait a moment.",
+          ),
+        );
+        return; // 🛑 עצור כאן! אל תמשיך ל-API
+      }
       response = yield call(moviesAPI.searchMovies, cleanTerm, page);
     }
     // תרחיש 2: אות אחת (לא עושים כלום או מנקים)
@@ -130,14 +153,17 @@ export default function* moviesSaga() {
     takeLatest(appStarted.type, fetchMoviesSaga),
 
     // בקשת טעינה יזומה
-    takeLatest(fetchMoviesRequest.type, fetchMoviesSaga),
+    // takeLatest(fetchMoviesRequest.type, fetchMoviesSaga),
 
     // האזנה לשינויים בחיפוש (עם Debounce)
+    // debounce(500, setSearchTerm.type, handleSearchChange),
     debounce(500, setSearchTerm.type, handleSearchChange),
 
-    // האזנה לפרטי סרט
-    takeLatest(fetchMovieDetailsRequest.type, fetchMovieDetailsSaga),
-
+    // 3. ✅ ביצוע הבקשה בפועל
+    // שינינו מ-debounce ל-takeLatest.
+    // למה? כי ה-debounce כבר קרה בשלב ההקלדה (למעלה).
+    // אם הגענו לכאן (או אם לחצנו על כפתור פג'ינציה), אנחנו רוצים ביצוע מיידי.
+    takeLatest(fetchMoviesRequest.type, fetchMoviesSaga),
     // האזנה לשינויי ניווט שמצריכים טעינה מחדש (הורדנו את selectCategory)
     takeLatest([setView.type, setPage.type], handleViewChange),
   ]);

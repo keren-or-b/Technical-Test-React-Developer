@@ -4,7 +4,8 @@ import { DEFAULT_GRID_COLUMNS } from "../../utils/constans";
 import styles from "./movieCard.module.css";
 import { memo, useEffect, useRef } from "react";
 
-const PLACEHOLDER_IMAGE = "https://via.placeholder.com/500x750?text=No+Image";
+const PLACEHOLDER_IMAGE = "/placeholder-movie.svg";
+const POSTER_PATH = "https://image.tmdb.org/t/p/w500";
 
 const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
   const cardRef = useRef(null);
@@ -48,7 +49,7 @@ const MovieCard = memo(({ movie, isActive, onHover, onClick, index }) => {
       <img
         src={
           movie.poster_path
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            ? `${POSTER_PATH}${movie.poster_path}`
             : PLACEHOLDER_IMAGE
         }
         alt={movie.title}

@@ -16,7 +16,7 @@ import {
   selectCurrentView,
   selectPage,
   selectTotalPages,
-  selectGridColumns,
+  selectGridColumns
 } from "../redux/movies/movieSlice";
 
 import { useKeyboardNavigation } from "../hooks/useKeyBoardNavigation"; // שים לב לתיקון האות הקטנה ב-file name אם צריך

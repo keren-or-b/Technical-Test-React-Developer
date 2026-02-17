@@ -16,6 +16,10 @@ const initialState = {
   searchTerm: "",
   focusArea: "MOVIE_GRID", // 'menu' או 'movies'
   focusIndex: 0,
+  cache: {
+    popular: {},
+    now_playing: {},
+  },
 };
 
 const movieSlice = createSlice({
@@ -33,9 +37,28 @@ const movieSlice = createSlice({
     },
     // פעולה כשיש הצלחה
     fetchMoviesSuccess: (state, action) => {
+      const { results, total_pages } = action.payload;
+
+      state.movies = results;
+      state.totalPages = total_pages;
       state.loading = false;
-      state.movies = action.payload.results;
-      state.totalPages = action.payload.total_pages;
+
+      const isSearch = state.searchTerm.length >= 2;
+
+      if (!isSearch && state.view !== "favorites") {
+        const view = state.view; // 'popular' או 'now_playing'
+        const page = state.page;
+
+        // יוצרים את האובייקט אם לא קיים
+        if (!state.cache[view]) state.cache[view] = {};
+
+        // שומרים את הנתונים + חותמת זמן (אופציונלי, לשימוש עתידי)
+        state.cache[view][page] = {
+          results,
+          total_pages,
+          timestamp: Date.now(),
+        };
+      }
     },
     // פעולה כשיש שגיאה
     fetchMoviesFailure: (state, action) => {
@@ -148,7 +171,7 @@ export const {
   fetchMovieDetailsFailure,
   setView,
   setPage,
-  
+
   setSearchTerm,
   setFocusArea,
   incrementFocusIndex,
